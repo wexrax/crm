@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEXUS — Операционная система для бизнеса</title>
+  <meta property="og:title" content="NEXUS CRM">
+  <meta property="og:description" content="Умная CRM с лентой событий, сделками, задачами и аналитикой.">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/feed.css">
+  <link rel="stylesheet" href="css/kanban.css">
+  <link rel="stylesheet" href="css/tasks.css">
+  <link rel="stylesheet" href="css/team.css">
+  <link rel="stylesheet" href="css/calendar.css">
+  <link rel="stylesheet" href="css/analytics.css">
+  <link rel="stylesheet" href="css/communications.css">
+  <link rel="stylesheet" href="css/settings.css">
+  <link rel="stylesheet" href="css/modal.css">
+  <link rel="stylesheet" href="css/toast.css">
+</head>
+<body>
+
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo" onclick="navigateTo('feed')"><i class="fa-solid fa-bolt"></i></div>
+    <div class="nav-item active" data-view="feed"><i class="fa-solid fa-house"></i><span class="tooltip">Умная лента</span></div>
+    <div class="nav-item" data-view="deals"><i class="fa-solid fa-briefcase"></i><span class="tooltip">Сделки</span></div>
+    <div class="nav-item" data-view="tasks"><i class="fa-solid fa-circle-check"></i><span class="tooltip">Задачи</span></div>
+    <div class="nav-item" data-view="team"><i class="fa-solid fa-users"></i><span class="tooltip">Команда</span></div>
+    <div class="nav-item" data-view="calendar"><i class="fa-solid fa-calendar-days"></i><span class="tooltip">Календарь</span></div>
+    <div class="nav-item" data-view="analytics"><i class="fa-solid fa-chart-column"></i><span class="tooltip">Аналитика</span></div>
+    <div class="nav-item" data-view="comms"><i class="fa-solid fa-comments"></i><span class="tooltip">Коммуникации</span></div>
+    <div class="nav-spacer"></div>
+    <div class="theme-toggle" onclick="toggleTheme()" title="Сменить тему">
+      <i class="fa-solid fa-moon icon-sun"></i>
+      <i class="fa-solid fa-sun icon-moon"></i>
+    </div>
+    <div class="nav-item" data-view="settings"><i class="fa-solid fa-gear"></i><span class="tooltip">Настройки</span></div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="topbar">
+      <div class="topbar-brand">NE<span>XUS</span></div>
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" placeholder="Найдите клиента, задачу или сделку…">
+        <span class="search-shortcut">⌘K</span>
+      </div>
+      <div class="topbar-spacer"></div>
+      <div class="icon-btn" onclick="showToast('Видеозвонок запускается…', 'fa-video')"><i class="fa-solid fa-video"></i></div>
+      <div class="icon-btn" onclick="showToast('3 новых уведомления', 'fa-bell')"><i class="fa-solid fa-bell"></i><span class="badge">3</span></div>
+      <div class="avatar-sm" onclick="showToast('Профиль: Анна Иванова', 'fa-user')">АИ</div>
+    </div>
+
+    <div class="content">
+
+      <!-- HOME / FEED -->
+      <div class="view active" id="view-feed">
+        <div class="view-title" id="pageTitle">Доброе утро, Анна <i class="fa-solid fa-hand-sparkles" style="color:#fbbf24;font-size:20px"></i></div>
+        <div class="view-subtitle" id="pageSubtitle">Сегодня у вас 3 встречи, 7 задач и уведомления. Всё важное — в одном потоке.</div>
+        <div id="feed" class="feed"></div>
+      </div>
+
+      <!-- DEALS -->
+      <div class="view" id="view-deals">
+        <div class="view-title">Воронка продаж</div>
+        <div class="view-subtitle">8 активных сделок · Прогноз закрытия ₽ 18,4М в этом месяце</div>
+        <div id="kanban" class="kanban"></div>
+      </div>
+
+      <!-- TASKS -->
+      <div class="view" id="view-tasks">
+        <div class="view-title">Задачи</div>
+        <div class="view-subtitle">7 активных · 2 срочные · Таск-менеджер с приоритизацией</div>
+        <div id="taskList" class="task-list"></div>
+      </div>
+
+      <!-- TEAM -->
+      <div class="view" id="view-team">
+        <div class="view-title">Команда</div>
+        <div class="view-subtitle">6 сотрудников · Статусы обновляются в реальном времени</div>
+        <div id="teamGrid" class="grid-2" style="max-width:820px"></div>
+      </div>
+
+      <!-- CALENDAR -->
+      <div class="view" id="view-calendar">
+        <div class="calendar-header">
+          <div class="calendar-title" id="calendarTitle">Октябрь 2026</div>
+          <div class="calendar-nav">
+            <div class="icon-btn" onclick="shiftMonth(-1)"><i class="fa-solid fa-chevron-left"></i></div>
+            <div class="icon-btn" onclick="shiftMonth(1)"><i class="fa-solid fa-chevron-right"></i></div>
+          </div>
+        </div>
+        <div id="calendarGrid" class="calendar-grid"></div>
+      </div>
+
+      <!-- ANALYTICS -->
+      <div class="view" id="view-analytics">
+        <div class="view-title">Аналитика · Прогноз выручки</div>
+        <div class="view-subtitle">Прогноз на основе исторических данных и текущей воронки</div>
+        <div id="statRow" class="stat-row"></div>
+        <div class="dashboard">
+          <div class="panel">
+            <div class="panel-title">Выручка по месяцам</div>
+            <div class="panel-sub">Прогноз с доверительным интервалом · 2026</div>
+            <div id="barChart" class="bar-chart"></div>
+          </div>
+          <div class="panel">
+            <div class="panel-title">Воронка продаж</div>
+            <div class="panel-sub">Текущий квартал</div>
+            <div id="funnel"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COMMUNICATIONS -->
+      <div class="view" id="view-comms">
+        <div class="view-title">Коммуникации</div>
+        <div class="view-subtitle">Все каналы в одном месте — видео, чат, почта, телефония</div>
+        <div id="commsGrid" class="comms-grid"></div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="view" id="view-settings">
+        <div class="view-title">Настройки · Безопасность</div>
+        <div class="view-subtitle">RBAC, 2FA, шифрование AES-256, аудит — всё под контролем</div>
+        <div id="settingsList" class="settings-list"></div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- Deal Modal -->
+<div class="overlay" id="dealModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-header-avatar" id="modalAvatar">Р</div>
+      <div class="modal-header-info">
+        <div class="modal-header-title" id="modalDealName">Ромашка ООО</div>
+        <div class="modal-header-meta" id="modalDealMeta">Ритейл · Москва</div>
+      </div>
+      <div class="modal-header-amount">
+        <b id="modalDealAmount">₽ 5 400 000</b>
+        <small id="modalDealProb">72% готовность</small>
+      </div>
+      <button class="modal-close" onclick="closeDealModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-tabs">
+      <div class="modal-tab active" onclick="switchModalTab('overview', this)">Обзор</div>
+      <div class="modal-tab" onclick="switchModalTab('comm', this)">Коммуникации</div>
+      <div class="modal-tab" onclick="switchModalTab('tsk', this)">Задачи</div>
+      <div class="modal-tab" onclick="switchModalTab('doc', this)">Документы</div>
+      <div class="modal-tab" onclick="switchModalTab('hist', this)">История</div>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <i class="fa-solid fa-check" id="toastIcon"></i>
+  <span id="toastMessage"></span>
+</div>
+
+<!-- Scripts -->
+<script src="js/data.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/feed.js"></script>
+<script src="js/kanban.js"></script>
+<script src="js/tasks.js"></script>
+<script src="js/team.js"></script>
+<script src="js/calendar.js"></script>
+<script src="js/analytics.js"></script>
+<script src="js/communications.js"></script>
+<script src="js/settings.js"></script>
+<script src="js/modal.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>

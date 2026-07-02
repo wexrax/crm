@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Presentation</title>
+  <meta charset="UTF-8"/>
+  <!-- PROTECTED: meta type -->
+  <meta name="type" value="presentation" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    /* === PROTECTED: Framework Reset === */
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Montserrat',system-ui,sans-serif;background:#000;overflow:hidden;height:100vh;display:flex;flex-direction:column}
+
+    /* === PROTECTED: Slide Transition Engine === */
+    .slide{opacity:0;transform:translateX(60px);transition:all .5s cubic-bezier(.4,0,.2,1);pointer-events:none;position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:40px}
+    .slide.active{opacity:1;transform:translateX(0);pointer-events:auto}
+    .slide.prev{opacity:0;transform:translateX(-60px)}
+
+    /* === EDITABLE: Slide Content Styles === */
+    .slide i.fa-solid,.slide i.fa-regular,.slide i.fa-brands{color:inherit}
+    .nx{font-family:'Inter',sans-serif;width:100%;height:100%;display:flex;color:#e5e9f5;position:relative;overflow:hidden}
+    .nx *{font-family:'Inter',sans-serif}
+    /* Sidebar */
+    .nx-side{width:74px;background:rgba(12,14,26,.75);backdrop-filter:blur(30px);border-right:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;align-items:center;padding:18px 0;gap:6px;z-index:20}
+    .nx-logo{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#6366f1,#a855f7,#ec4899);display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;margin-bottom:16px;box-shadow:0 6px 20px rgba(139,92,246,.5);cursor:pointer;transition:transform .3s}
+    .nx-logo:hover{transform:scale(1.08) rotate(-6deg)}
+    .nx-nav{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#8b93b0;cursor:pointer;transition:all .25s;position:relative}
+    .nx-nav:hover{background:rgba(255,255,255,.07);color:#fff}
+    .nx-nav.on{background:linear-gradient(135deg,rgba(99,102,241,.3),rgba(168,85,247,.25));color:#fff;box-shadow:inset 0 0 0 1px rgba(139,92,246,.4)}
+    .nx-nav.on::before{content:'';position:absolute;left:-18px;width:3px;height:24px;border-radius:3px;background:linear-gradient(#6366f1,#ec4899)}
+    .nx-tip{position:absolute;left:58px;background:rgba(20,22,38,.95);color:#fff;font-size:12px;padding:6px 12px;border-radius:8px;white-space:nowrap;opacity:0;pointer-events:none;transition:.2s;transform:translateX(-6px);z-index:50;border:1px solid rgba(255,255,255,.08)}
+    .nx-nav:hover .nx-tip{opacity:1;transform:translateX(0)}
+    /* Main */
+    .nx-main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+    .nx-top{height:62px;display:flex;align-items:center;gap:16px;padding:0 26px;border-bottom:1px solid rgba(255,255,255,.05);background:rgba(12,14,26,.5);backdrop-filter:blur(20px);z-index:10}
+    .nx-search{flex:1;max-width:460px;display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:9px 16px;color:#8b93b0;font-size:13px;cursor:text;transition:.25s}
+    .nx-search:hover{border-color:rgba(139,92,246,.4);background:rgba(255,255,255,.08)}
+    .nx-top-btn{width:38px;height:38px;border-radius:11px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;color:#b8bfd6;cursor:pointer;transition:.2s;font-size:15px;position:relative}
+    .nx-top-btn:hover{background:rgba(255,255,255,.1);color:#fff}
+    .nx-badge{position:absolute;top:-4px;right:-4px;background:#ec4899;color:#fff;font-size:9px;font-weight:700;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 4px}
+    .nx-avatar{width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,#f59e0b,#ef4444);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px;cursor:pointer}
+    .nx-body{flex:1;overflow-y:auto;padding:26px 30px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.15) transparent}
+    .nx-body::-webkit-scrollbar{width:8px}
+    .nx-body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:8px}
+    .nx-h1{font-size:26px;font-weight:800;color:#fff;letter-spacing:-.5px;margin-bottom:4px}
+    .nx-sub{font-size:13px;color:#8b93b0;margin-bottom:22px}
+    .nx-view{display:none;animation:nxfade .5s cubic-bezier(.2,.8,.2,1)}
+    .nx-view.show{display:block}
+    @keyframes nxfade{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+    /* Cards / feed */
+    .nx-grid{display:grid;gap:16px}
+    .nx-stats{grid-template-columns:repeat(4,1fr);margin-bottom:22px}
+    .nx-stat{background:linear-gradient(160deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:20px;cursor:pointer;transition:.3s;position:relative;overflow:hidden}
+    .nx-stat:hover{transform:translateY(-4px);border-color:rgba(139,92,246,.4);box-shadow:0 16px 40px rgba(0,0,0,.4)}
+    .nx-stat i{font-size:18px;width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+    .nx-stat-v{font-size:26px;font-weight:800;color:#fff;letter-spacing:-.5px}
+    .nx-stat-l{font-size:12px;color:#8b93b0;margin-top:2px}
+    .nx-stat-t{font-size:11px;font-weight:600;margin-top:8px;display:inline-flex;align-items:center;gap:4px}
+    .nx-card{background:linear-gradient(160deg,rgba(255,255,255,.055),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:18px 20px;transition:.3s;cursor:pointer}
+    .nx-card:hover{border-color:rgba(139,92,246,.35);transform:translateY(-3px);box-shadow:0 14px 36px rgba(0,0,0,.35)}
+    .nx-feed{display:flex;flex-direction:column;gap:14px;max-width:760px}
+    .nx-fc{display:flex;gap:14px;align-items:flex-start}
+    .nx-fc-ic{width:44px;height:44px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+    .nx-fc-b{flex:1}
+    .nx-fc-t{font-size:14px;font-weight:600;color:#fff;margin-bottom:3px}
+    .nx-fc-d{font-size:12.5px;color:#9aa2bd;line-height:1.5}
+    .nx-fc-tag{display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:3px 9px;border-radius:6px;margin-bottom:8px}
+    .nx-acts{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+    .nx-btn{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:7px 14px;border-radius:9px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#d5daea;cursor:pointer;transition:.2s}
+    .nx-btn:hover{background:rgba(255,255,255,.12);color:#fff;transform:translateY(-1px)}
+    .nx-btn.p{background:linear-gradient(135deg,#6366f1,#a855f7);border-color:transparent;color:#fff}
+    .nx-btn.p:hover{box-shadow:0 6px 18px rgba(139,92,246,.5)}
+    /* Kanban */
+    .nx-kan{display:flex;gap:16px;overflow-x:auto;padding-bottom:10px}
+    .nx-col{min-width:250px;flex:1;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:14px}
+    .nx-col-h{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:700;color:#fff;margin-bottom:12px;padding:0 4px}
+    .nx-col-c{font-size:11px;color:#8b93b0;background:rgba(255,255,255,.07);padding:2px 8px;border-radius:8px}
+    .nx-deal{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:13px;margin-bottom:10px;cursor:pointer;transition:.25s}
+    .nx-deal:hover{transform:translateY(-2px) scale(1.01);border-color:rgba(139,92,246,.4);background:rgba(255,255,255,.08)}
+    .nx-deal-t{font-size:13px;font-weight:600;color:#fff;margin-bottom:5px}
+    .nx-deal-s{font-size:16px;font-weight:800;color:#a855f7}
+    .nx-deal-m{display:flex;align-items:center;justify-content:space-between;margin-top:9px;font-size:11px;color:#8b93b0}
+    .nx-dot{width:26px;height:26px;border-radius:50%;font-size:10px;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700}
+    /* progress */
+    .nx-prog{height:6px;background:rgba(255,255,255,.08);border-radius:6px;overflow:hidden;margin-top:8px}
+    .nx-prog i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#6366f1,#ec4899)}
+    /* modal */
+    .nx-ov{position:absolute;inset:0;background:rgba(4,6,16,.7);backdrop-filter:blur(10px);z-index:100;display:none;align-items:center;justify-content:center;padding:30px;animation:nxfade .3s}
+    .nx-ov.show{display:flex}
+    .nx-modal{width:640px;max-width:100%;max-height:88%;background:linear-gradient(160deg,#161a2e,#0f1120);border:1px solid rgba(255,255,255,.1);border-radius:22px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 30px 90px rgba(0,0,0,.6);animation:nxpop .4s cubic-bezier(.2,1.2,.3,1)}
+    @keyframes nxpop{from{transform:scale(.92) translateY(20px);opacity:0}to{transform:none;opacity:1}}
+    .nx-mh{padding:22px 24px;display:flex;align-items:center;gap:14px;border-bottom:1px solid rgba(255,255,255,.07);position:relative}
+    .nx-mh-av{width:50px;height:50px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;font-weight:800}
+    .nx-mb{padding:20px 24px;overflow-y:auto;scrollbar-width:thin}
+    .nx-tabs{display:flex;gap:4px;padding:0 24px;border-bottom:1px solid rgba(255,255,255,.07);overflow-x:auto}
+    .nx-tab{padding:12px 14px;font-size:12.5px;font-weight:600;color:#8b93b0;cursor:pointer;border-bottom:2px solid transparent;transition:.2s;white-space:nowrap}
+    .nx-tab.on{color:#fff;border-color:#a855f7}
+    .nx-tab:hover{color:#fff}
+    .nx-close{position:absolute;top:18px;right:18px;width:32px;height:32px;border-radius:10px;background:rgba(255,255,255,.07);border:none;color:#b8bfd6;cursor:pointer;font-size:14px;transition:.2s}
+    .nx-close:hover{background:rgba(236,72,153,.3);color:#fff}
+    .nx-tabpane{display:none}
+    .nx-tabpane.on{display:block;animation:nxfade .3s}
+    .nx-line{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px;color:#c5cbe0}
+    .nx-line i{color:#a855f7;width:20px;text-align:center;margin-top:2px}
+    /* AI assistant */
+    .nx-ai{position:absolute;bottom:26px;right:26px;width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#a855f7,#ec4899);display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;cursor:pointer;z-index:40;box-shadow:0 8px 30px rgba(139,92,246,.6);transition:.3s;animation:nxpulse 2.5s infinite}
+    .nx-ai:hover{transform:scale(1.1)}
+    @keyframes nxpulse{0%,100%{box-shadow:0 8px 30px rgba(139,92,246,.6)}50%{box-shadow:0 8px 45px rgba(236,72,153,.8)}}
+    .nx-ai-panel{position:absolute;bottom:96px;right:26px;width:340px;max-height:70%;background:linear-gradient(160deg,#161a2e,#0f1120);border:1px solid rgba(139,92,246,.3);border-radius:20px;z-index:45;display:none;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.6);animation:nxpop .35s}
+    .nx-ai-panel.show{display:flex}
+    .nx-ai-h{padding:16px 18px;background:linear-gradient(135deg,rgba(99,102,241,.25),rgba(236,72,153,.15));display:flex;align-items:center;gap:10px;font-weight:700;color:#fff;font-size:14px;border-bottom:1px solid rgba(255,255,255,.08)}
+    .nx-ai-msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;scrollbar-width:thin}
+    .nx-msg{padding:11px 14px;border-radius:14px;font-size:12.5px;line-height:1.5;max-width:88%}
+    .nx-msg.ai{background:rgba(139,92,246,.15);border:1px solid rgba(139,92,246,.25);color:#e5e9f5;align-self:flex-start;border-bottom-left-radius:4px}
+    .nx-msg.me{background:linear-gradient(135deg,#6366f1,#a855f7);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+    .nx-ai-in{display:flex;gap:8px;padding:12px;border-top:1px solid rgba(255,255,255,.07)}
+    .nx-ai-in input{flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:11px;padding:10px 14px;color:#fff;font-size:12.5px;outline:none}
+    .nx-ai-in input:focus{border-color:rgba(139,92,246,.5)}
+    .nx-ai-send{width:38px;background:linear-gradient(135deg,#6366f1,#a855f7);border:none;border-radius:11px;color:#fff;cursor:pointer;font-size:14px}
+    .nx-chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:5px 11px;border-radius:20px;background:rgba(139,92,246,.15);border:1px solid rgba(139,92,246,.3);color:#c4b5fd;cursor:pointer;transition:.2s;margin:3px}
+    .nx-chip:hover{background:rgba(139,92,246,.3);color:#fff}
+    /* team */
+    .nx-mem{display:flex;align-items:center;gap:14px;padding:14px 16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:14px;transition:.25s;cursor:pointer}
+    .nx-mem:hover{background:rgba(255,255,255,.08);transform:translateX(4px)}
+    .nx-st-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+    /* chart bars */
+    .nx-bars{display:flex;align-items:flex-end;gap:12px;height:180px;padding:16px 0}
+    .nx-bar{flex:1;background:linear-gradient(#6366f1,#a855f7);border-radius:8px 8px 0 0;position:relative;transition:.4s;cursor:pointer;min-height:8px}
+    .nx-bar:hover{filter:brightness(1.2)}
+    .nx-bar span{position:absolute;top:-22px;left:0;right:0;text-align:center;font-size:11px;font-weight:700;color:#fff}
+    .nx-bar b{position:absolute;bottom:-24px;left:0;right:0;text-align:center;font-size:11px;color:#8b93b0;font-weight:500}
+    /* toast */
+    .nx-toast{position:absolute;top:74px;right:26px;background:rgba(20,22,38,.95);border:1px solid rgba(139,92,246,.4);color:#fff;padding:13px 18px;border-radius:13px;font-size:13px;z-index:200;display:flex;align-items:center;gap:10px;opacity:0;transform:translateX(30px);transition:.4s;box-shadow:0 12px 40px rgba(0,0,0,.5);pointer-events:none}
+    .nx-toast.show{opacity:1;transform:none}
+    .nx-badge2{display:inline-block;font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px}
+    @media(max-width:900px){.nx-stats{grid-template-columns:repeat(2,1fr)}.nx-side{width:60px}}
+
+    /* === PROTECTED: UI Controls === */
+    .btn{display:flex;align-items:center;gap:6px;padding:6px 14px;border:none;border-radius:980px;background:rgba(255,255,255,.07);color:rgba(255,255,255,.85);font-size:13px;cursor:pointer;transition:all .2s;font:inherit;height:2rem;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+    .btn:hover{background:rgba(255,255,255,.15)}
+    .btn:active{transform:scale(.96)}
+    .btn:disabled{opacity:.25;cursor:not-allowed;transform:none}
+    .xmenu{position:absolute;bottom:100%;left:0;margin-bottom:8px;background:rgba(30,30,30,.9);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:6px;display:none;flex-direction:column;gap:1px;min-width:220px;box-shadow:0 12px 48px rgba(0,0,0,.6);z-index:100}
+    .xmenu.open{display:flex}
+    .xi{display:flex;align-items:center;gap:10px;padding:8px 12px;border:none;border-radius:10px;background:0;color:rgba(255,255,255,.85);font-size:13px;cursor:pointer;transition:all .15s;font:inherit;text-align:left;white-space:nowrap}
+    .xi:hover{background:rgba(255,255,255,.08)}
+    .xi i{width:20px;text-align:center;font-size:15px}
+    .xi .ext{margin-left:auto;font-size:10px;color:#666;background:rgba(255,255,255,.06);padding:2px 7px;border-radius:6px;font-weight:500}
+    .toast{position:fixed;top:20px;right:20px;background:rgba(30,30,30,.9);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.85);padding:12px 18px;border-radius:14px;font-size:13px;z-index:1000;transform:translateY(-20px);opacity:0;transition:all .35s cubic-bezier(.4,0,.2,1);display:flex;align-items:center;gap:10px;box-shadow:0 12px 48px rgba(0,0,0,.5);max-width:300px}
+    .toast.show{transform:translateY(0);opacity:1}
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:2000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s}
+    .modal-overlay.open{opacity:1;pointer-events:auto}
+    .modal{background:rgba(30,30,30,.95);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:32px;max-width:420px;width:90%;color:rgba(255,255,255,.9);box-shadow:0 24px 80px rgba(0,0,0,.6);transform:scale(.95) translateY(10px);transition:transform .3s cubic-bezier(.4,0,.2,1)}
+    .modal-overlay.open .modal{transform:scale(1) translateY(0)}
+    .modal h3{font-size:18px;font-weight:600;margin-bottom:8px}
+    .modal p{font-size:14px;color:rgba(255,255,255,.6);line-height:1.5;margin-bottom:20px}
+    .modal-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border:none;border-radius:12px;font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;font:inherit}
+    .modal-btn:hover{transform:translateY(-1px)}
+    .modal-btn.primary{background:rgba(255,255,255,.12);color:#fff}
+    .modal-btn.primary:hover{background:rgba(255,255,255,.2)}
+    .progress-wrap{height:2px;background:rgba(255,255,255,.05)}
+    .progress-fill{height:100%;background:rgba(255,255,255,.4);transition:width .5s cubic-bezier(.4,0,.2,1);border-radius:9px}
+    .bar{display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 16px;background:rgba(18,18,18,.8);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px)}
+    .counter{color:rgba(255,255,255,.3);font-size:13px;min-width:40px;text-align:center;margin:0 8px;font-weight:500}
+  </style>
+</head>
+<body>
+  <!-- PROTECTED: Progress Bar -->
+  <div class="progress-wrap"><div class="progress-fill" id="progressFill"></div></div>
+
+  <!-- EDITABLE: Slides Container — modify only slide inner content -->
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden" id="slidesContainer">
+
+    <div class="slide active" style="background:radial-gradient(circle at 20% 10%,#1a1d38 0%,#0a0c18 55%,#06070f 100%)" data-slide="0">
+      <div style="display:none">1 / 1</div>
+      <div class="nx">
+        <!-- SIDEBAR -->
+        <div class="nx-side">
+          <div class="nx-logo" onclick="nxGo('home')"><i class="fa-solid fa-bolt"></i></div>
+          <div class="nx-nav on" data-v="home" onclick="nxGo('home')"><i class="fa-solid fa-house"></i><span class="nx-tip">Умная лента</span></div>
+          <div class="nx-nav" data-v="deals" onclick="nxGo('deals')"><i class="fa-solid fa-briefcase"></i><span class="nx-tip">Сделки</span></div>
+          <div class="nx-nav" data-v="tasks" onclick="nxGo('tasks')"><i class="fa-solid fa-circle-check"></i><span class="nx-tip">Задачи</span></div>
+          <div class="nx-nav" data-v="team" onclick="nxGo('team')"><i class="fa-solid fa-users"></i><span class="nx-tip">Команда</span></div>
+          <div class="nx-nav" data-v="comms" onclick="nxGo('comms')"><i class="fa-solid fa-comments"></i><span class="nx-tip">Коммуникации</span></div>
+          <div class="nx-nav" data-v="analytics" onclick="nxGo('analytics')"><i class="fa-solid fa-chart-column"></i><span class="nx-tip">Аналитика</span></div>
+          <div class="nx-nav" data-v="ai" onclick="nxGo('ai')"><i class="fa-solid fa-robot"></i><span class="nx-tip">AI-агенты</span></div>
+          <div style="flex:1"></div>
+          <div class="nx-nav" data-v="settings" onclick="nxGo('settings')"><i class="fa-solid fa-gear"></i><span class="nx-tip">Настройки</span></div>
+        </div>
+
+        <!-- MAIN -->
+        <div class="nx-main">
+          <div class="nx-top">
+            <div style="font-size:19px;font-weight:800;color:#fff;letter-spacing:-.5px">NE<span style="background:linear-gradient(135deg,#a855f7,#ec4899);-webkit-background-clip:text;background-clip:text;color:transparent">XUS</span></div>
+            <div class="nx-search" onclick="nxAsk('Покажи все горячие лиды')"><i class="fa-solid fa-magnifying-glass"></i><span>Спросите NEXUS или найдите что угодно…</span><span style="margin-left:auto;font-size:11px;color:#5b6280">⌘K</span></div>
+            <div style="flex:1"></div>
+            <div class="nx-top-btn" onclick="nxToast('Видеозвонок запускается…','fa-video')"><i class="fa-solid fa-video"></i></div>
+            <div class="nx-top-btn" onclick="nxToast('3 новых уведомления','fa-bell')"><i class="fa-solid fa-bell"></i><span class="nx-badge">3</span></div>
+            <div class="nx-avatar" onclick="nxToast('Профиль: Анна Иванова','fa-user')">АИ</div>
+          </div>
+
+          <div class="nx-body">
+            <!-- HOME / FEED -->
+            <div class="nx-view show" id="v-home">
+              <div class="nx-h1">Доброе утро, Анна <i class="fa-solid fa-hand-sparkles" style="color:#f59e0b;font-size:20px"></i></div>
+              <div class="nx-sub">Сегодня у вас 3 встречи, 7 задач и 2 инсайта от ИИ. NEXUS уже всё подготовил.</div>
+
+              <div class="nx-grid nx-stats">
+                <div class="nx-stat" onclick="nxGo('deals')">
+                  <i style="background:rgba(99,102,241,.2);color:#818cf8"><i class="fa-solid fa-briefcase"></i></i>
+                  <div class="nx-stat-v">₽ 24,8М</div><div class="nx-stat-l">Сделки в работе</div>
+                  <div class="nx-stat-t" style="color:#34d399"><i class="fa-solid fa-arrow-up"></i> +18% за месяц</div>
+                </div>
+                <div class="nx-stat" onclick="nxGo('analytics')">
+                  <i style="background:rgba(52,211,153,.2);color:#34d399"><i class="fa-solid fa-bullseye"></i></i>
+                  <div class="nx-stat-v">85%</div><div class="nx-stat-l">Выполнение плана</div>
+                  <div class="nx-stat-t" style="color:#34d399"><i class="fa-solid fa-arrow-up"></i> +5% к цели</div>
+                </div>
+                <div class="nx-stat" onclick="nxGo('tasks')">
+                  <i style="background:rgba(245,158,11,.2);color:#fbbf24"><i class="fa-solid fa-list-check"></i></i>
+                  <div class="nx-stat-v">7</div><div class="nx-stat-l">Активных задач</div>
+                  <div class="nx-stat-t" style="color:#fbbf24"><i class="fa-solid fa-clock"></i> 2 срочные</div>
+                </div>
+                <div class="nx-stat" onclick="nxAsk('Расскажи про риск оттока')">
+                  <i style="background:rgba(236,72,153,.2);color:#f472b6"><i class="fa-solid fa-heart-pulse"></i></i>
+                  <div class="nx-stat-v">96%</div><div class="nx-stat-l">Здоровье базы</div>
+                  <div class="nx-stat-t" style="color:#34d399"><i class="fa-solid fa-check"></i> Отлично</div>
+                </div>
+              </div>
+
+              <div style="font-size:15px;font-weight:700;color:#fff;margin-bottom:14px"><i class="fa-solid fa-stream" style="color:#a855f7"></i> Умная лента</div>
+              <div class="nx-feed">
+                <div class="nx-card nx-fc" onclick="nxDeal(0)">
+                  <div class="nx-fc-ic" style="background:rgba(236,72,153,.18);color:#f472b6"><i class="fa-solid fa-brain"></i></div>
+                  <div class="nx-fc-b">
+                    <span class="nx-fc-tag" style="background:rgba(236,72,153,.2);color:#f472b6">Инсайт от ИИ</span>
+                    <div class="nx-fc-t">Клиент «Ромашка» готов к закрытию — вероятность 85%</div>
+                    <div class="nx-fc-d">КП прочитано вчера в 20:00. Рекомендую позвонить в 10:00. Скрипт разговора уже подготовлен.</div>
+                    <div class="nx-acts">
+                      <button class="nx-btn p" onclick="event.stopPropagation();nxToast('Набираю Ромашку через WebRTC…','fa-phone')"><i class="fa-solid fa-phone"></i> Позвонить</button>
+                      <button class="nx-btn" onclick="event.stopPropagation();nxAsk('Покажи скрипт для Ромашки')"><i class="fa-solid fa-file-lines"></i> Скрипт ИИ</button>
+                      <button class="nx-btn" onclick="event.stopPropagation();nxToast('Отложено на 1 час','fa-clock')"><i class="fa-solid fa-clock"></i> Отложить</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="nx-card nx-fc" onclick="nxToast('Открываю встречу…','fa-video')">
+                  <div class="nx-fc-ic" style="background:rgba(99,102,241,.18);color:#818cf8"><i class="fa-solid fa-calendar-check"></i></div>
+                  <div class="nx-fc-b">
+                    <span class="nx-fc-tag" style="background:rgba(99,102,241,.2);color:#818cf8">Событие</span>
+                    <div class="nx-fc-t">Видеовстреча с «ТехноПром» через 15 минут</div>
+                    <div class="nx-fc-d">Демонстрация NEXUS Enterprise. Участники: 4 человека. Материалы прикреплены.</div>
+                    <div class="nx-acts">
+                      <button class="nx-btn p" onclick="event.stopPropagation();nxToast('Подключаюсь к встрече…','fa-video')"><i class="fa-solid fa-video"></i> Присоединиться</button>
+                      <button class="nx-btn" onclick="event.stopPropagation();nxToast('Встреча перенесена','fa-calendar')"><i class="fa-solid fa-calendar"></i> Перенести</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="nx-card nx-fc" onclick="nxGo('tasks')">
+                  <div class="nx-fc-ic" style="background:rgba(52,211,153,.18);color:#34d399"><i class="fa-solid fa-circle-check"></i></div>
+                  <div class="nx-fc-b">
+                    <span class="nx-fc-tag" style="background:rgba(52,211,153,.2);color:#34d399">Задача</span>
+                    <div class="nx-fc-t">Отправить дополнительный расчёт клиенту «Ромашка»</div>
+                    <div class="nx-fc-d">Срок до 16:00 сегодня · Создано автоматически после звонка</div>
+                    <div class="nx-acts">
+                      <button class="nx-btn p" onclick="event.stopPropagation();nxToast('Задача выполнена! +10 очков','fa-check')"><i class="fa-solid fa-check"></i> Выполнить</button>
+                      <button class="nx-btn" onclick="event.stopPropagation();nxToast('Задача делегирована','fa-share')"><i class="fa-solid fa-share"></i> Делегировать</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="nx-card nx-fc" onclick="nxToast('Открываю чат…','fa-message')">
+                  <div class="nx-fc-ic" style="background:rgba(245,158,11,.18);color:#fbbf24"><i class="fa-brands fa-telegram"></i></div>
+                  <div class="nx-fc-b">
+                    <span class="nx-fc-tag" style="background:rgba(245,158,11,.2);color:#fbbf24">Telegram</span>
+                    <div class="nx-fc-t">Новое сообщение от Дмитрия (ООО «Вектор»)</div>
+                    <div class="nx-fc-d">«Здравствуйте! Хотели бы обсудить условия по корпоративному тарифу…»</div>
+                    <div class="nx-acts">
+                      <button class="nx-btn p" onclick="event.stopPropagation();nxToast('Открываю диалог','fa-reply')"><i class="fa-solid fa-reply"></i> Ответить</button>
+                      <button class="nx-btn" onclick="event.stopPropagation();nxToast('Создана задача из сообщения','fa-plus')"><i class="fa-solid fa-plus"></i> В задачу</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="nx-card nx-fc" onclick="nxToast('Медаль в вашей коллекции!','fa-medal')">
+                  <div class="nx-fc-ic" style="background:rgba(168,85,247,.18);color:#c084fc"><i class="fa-solid fa-trophy"></i></div>
+                  <div class="nx-fc-b">
+                    <span class="nx-fc-tag" style="background:rgba(168,85,247,.2);color:#c084fc">Достижение</span>
+                    <div class="nx-fc-t">Вы превысили план по звонкам на 20% <i class="fa-solid fa-fire" style="color:#f59e0b"></i></div>
+                    <div class="nx-fc-d">Виртуальная медаль «Золотой звонок» ваша! Бонус увеличен.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- DEALS -->
+            <div class="nx-view" id="v-deals">
+              <div class="nx-h1">Воронка продаж</div>
+              <div class="nx-sub">24 активных сделки · Прогноз закрытия ₽ 18,4М в этом месяце</div>
+              <div class="nx-kan">
+                <div class="nx-col">
+                  <div class="nx-col-h">Новые <span class="nx-col-c">3</span></div>
+                  <div class="nx-deal" onclick="nxDeal(0)"><div class="nx-deal-t">Ромашка ООО</div><div class="nx-deal-s">₽ 2,4М</div><div class="nx-prog"><i style="width:20%"></i></div><div class="nx-deal-m"><span>Квалификация</span><span class="nx-dot" style="background:#ec4899">85</span></div></div>
+                  <div class="nx-deal" onclick="nxDeal(1)"><div class="nx-deal-t">Вектор</div><div class="nx-deal-s">₽ 1,1М</div><div class="nx-prog"><i style="width:15%"></i></div><div class="nx-deal-m"><span>Первый контакт</span><span class="nx-dot" style="background:#6366f1">42</span></div></div>
+                </div>
+                <div class="nx-col">
+                  <div class="nx-col-h">Переговоры <span class="nx-col-c">2</span></div>
+                  <div class="nx-deal" onclick="nxDeal(2)"><div class="nx-deal-t">ТехноПром</div><div class="nx-deal-s">₽ 8,5М</div><div class="nx-prog"><i style="width:55%"></i></div><div class="nx-deal-m"><span>Демо проведено</span><span class="nx-dot" style="background:#f59e0b">67</span></div></div>
+                  <div class="nx-deal" onclick="nxDeal(3)"><div class="nx-deal-t">СтройГрупп</div><div class="nx-deal-s">₽ 4,2М</div><div class="nx-prog"><i style="width:60%"></i></div><div class="nx-deal-m"><span>Обсуждение</span><span class="nx-dot" style="background:#f59e0b">71</span></div></div>
+                </div>
+                <div class="nx-col">
+                  <div class="nx-col-h">Договор <span class="nx-col-c">2</span></div>
+                  <div class="nx-deal" onclick="nxDeal(4)"><div class="nx-deal-t">МегаТрейд</div><div class="nx-deal-s">₽ 6,0М</div><div class="nx-prog"><i style="width:85%"></i></div><div class="nx-deal-m"><span>На согласовании</span><span class="nx-dot" style="background:#34d399">92</span></div></div>
+                </div>
+                <div class="nx-col">
+                  <div class="nx-col-h">Выиграно <span class="nx-col-c">1</span></div>
+                  <div class="nx-deal" onclick="nxDeal(5)"><div class="nx-deal-t">Финам Плюс</div><div class="nx-deal-s">₽ 3,3М</div><div class="nx-prog"><i style="width:100%"></i></div><div class="nx-deal-m"><span>Оплачено</span><span class="nx-dot" style="background:#34d399"><i class="fa-solid fa-check"></i></span></div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- TASKS -->
+            <div class="nx-view" id="v-tasks">
+              <div class="nx-h1">Задачи</div>
+              <div class="nx-sub">7 активных · 2 срочные · Умный таск-менеджер с ИИ-приоритизацией</div>
+              <div class="nx-feed" style="max-width:820px">
+                <div class="nx-card nx-fc" onclick="nxToast('Задача выполнена! +10','fa-check')"><div class="nx-fc-ic" style="background:rgba(239,68,68,.18);color:#f87171"><i class="fa-solid fa-fire"></i></div><div class="nx-fc-b"><span class="nx-badge2" style="background:rgba(239,68,68,.2);color:#f87171">Высокий</span> <span style="font-size:11px;color:#8b93b0;margin-left:6px">до 16:00</span><div class="nx-fc-t" style="margin-top:5px">Отправить расчёт клиенту «Ромашка»</div><div class="nx-fc-d">Исполнитель: вы · Наблюдатель: руководитель</div></div></div>
+                <div class="nx-card nx-fc" onclick="nxToast('Согласование запущено','fa-check-double')"><div class="nx-fc-ic" style="background:rgba(245,158,11,.18);color:#fbbf24"><i class="fa-solid fa-file-signature"></i></div><div class="nx-fc-b"><span class="nx-badge2" style="background:rgba(245,158,11,.2);color:#fbbf24">На согласовании</span><div class="nx-fc-t" style="margin-top:5px">Утвердить договор с «ТехноПром»</div><div class="nx-fc-d">Цепочка: Иванов → Петров → Финдиректор · Low-code маршрут</div></div></div>
+                <div class="nx-card nx-fc" onclick="nxToast('Готово!','fa-check')"><div class="nx-fc-ic" style="background:rgba(99,102,241,.18);color:#818cf8"><i class="fa-solid fa-phone"></i></div><div class="nx-fc-b"><span class="nx-badge2" style="background:rgba(99,102,241,.2);color:#818cf8">Средний</span><div class="nx-fc-t" style="margin-top:5px">Позвонить в «Вектор» — уточнить бюджет</div><div class="nx-fc-d">Завтра 11:00 · Автонапоминание включено</div></div></div>
+                <div class="nx-card nx-fc" onclick="nxToast('Готово!','fa-check')"><div class="nx-fc-ic" style="background:rgba(52,211,153,.18);color:#34d399"><i class="fa-solid fa-envelope"></i></div><div class="nx-fc-b"><span class="nx-badge2" style="background:rgba(52,211,153,.2);color:#34d399">Низкий</span><div class="nx-fc-t" style="margin-top:5px">Отправить КП «СтройГрупп» (ИИ сгенерировал)</div><div class="nx-fc-d">Черновик готов · Осталось проверить и отправить</div></div></div>
+              </div>
+            </div>
+
+            <!-- TEAM -->
+            <div class="nx-view" id="v-team">
+              <div class="nx-h1">Команда</div>
+              <div class="nx-sub">6 сотрудников онлайн · Статусы обновляются в реальном времени</div>
+              <div class="nx-grid" style="grid-template-columns:repeat(2,1fr);max-width:820px">
+                <div class="nx-mem" onclick="nxToast('Открываю чат с Анной','fa-message')"><div class="nx-avatar" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">АИ</div><div style="flex:1"><div style="font-weight:600;color:#fff;font-size:13px">Анна Иванова</div><div style="font-size:11px;color:#8b93b0">Менеджер · 12 сделок</div></div><div style="display:flex;align-items:center;gap:6px"><span class="nx-st-dot" style="background:#34d399"></span><span style="font-size:11px;color:#34d399">Онлайн</span></div></div>
+                <div class="nx-mem" onclick="nxToast('Открываю чат с Петром','fa-message')"><div class="nx-avatar" style="background:linear-gradient(135deg,#6366f1,#a855f7)">ПС</div><div style="flex:1"><div style="font-weight:600;color:#fff;font-size:13px">Пётр Смирнов</div><div style="font-size:11px;color:#8b93b0">Руководитель отдела</div></div><div style="display:flex;align-items:center;gap:6px"><span class="nx-st-dot" style="background:#f59e0b"></span><span style="font-size:11px;color:#fbbf24">На встрече</span></div></div>
+                <div class="nx-mem" onclick="nxToast('Открываю чат с Марией','fa-message')"><div class="nx-avatar" style="background:linear-gradient(135deg,#10b981,#059669)">МК</div><div style="flex:1"><div style="font-weight:600;color:#fff;font-size:13px">Мария Козлова</div><div style="font-size:11px;color:#8b93b0">Специалист поддержки</div></div><div style="display:flex;align-items:center;gap:6px"><span class="nx-st-dot" style="background:#34d399"></span><span style="font-size:11px;color:#34d399">Онлайн</span></div></div>
+                <div class="nx-mem" onclick="nxToast('Открываю чат с Игорем','fa-message')"><div class="nx-avatar" style="background:linear-gradient(135deg,#8b5cf6,#ec4899)">ИН</div><div style="flex:1"><div style="font-weight:600;color:#fff;font-size:13px">Игорь Новиков</div><div style="font-size:11px;color:#8b93b0">Маркетолог</div></div><div style="display:flex;align-items:center;gap:6px"><span class="nx-st-dot" style="background:#6b7280"></span><span style="font-size:11px;color:#8b93b0">Не беспокоить</span></div></div>
+              </div>
+            </div>
+
+            <!-- COMMS -->
+            <div class="nx-view" id="v-comms">
+              <div class="nx-h1">Omnichannel Hub</div>
+              <div class="nx-sub">Все каналы в одном месте — видео, чат, мессенджеры, почта, телефония</div>
+              <div class="nx-grid" style="grid-template-columns:repeat(3,1fr)">
+                <div class="nx-card" style="text-align:center" onclick="nxToast('Запуск видеозвонка HD…','fa-video')"><i class="fa-solid fa-video" style="font-size:26px;color:#818cf8"></i><div style="font-weight:700;color:#fff;margin-top:12px">Видеозвонок</div><div style="font-size:11px;color:#8b93b0;margin-top:4px">WebRTC HD · до 100 участников</div></div>
+                <div class="nx-card" style="text-align:center" onclick="nxToast('Мессенджер открыт','fa-comment')"><i class="fa-solid fa-comment-dots" style="font-size:26px;color:#34d399"></i><div style="font-weight:700;color:#fff;margin-top:12px">Корп. чат</div><div style="font-size:11px;color:#8b93b0;margin-top:4px">Контекстные чаты по сделкам</div></div>
+                <div class="nx-card" style="text-align:center" onclick="nxToast('WhatsApp подключён','fa-whatsapp')"><i class="fa-brands fa-whatsapp" style="font-size:26px;color:#25d366"></i><div style="font-weight:700;color:#fff;margin-top:12px">WhatsApp</div><div style="font-size:11px;color:#8b93b0;margin-top:4px">Приём и отправка сообщений</div></div>
+                <div class="nx-card" style="text-align:center" onclick="nxToast('Telegram подключён','fa-telegram')"><i class="fa-brands fa-telegram" style="font-size:26px;color:#2aabee"></i><div style="font-weight:700;color:#fff;margin-top:12px">Telegram</div><div style="font-size:11px;color:#8b93b0;margin-top:4px">Диалоги → задачи в 1 клик</div></div>
+                <div class="nx-card" style="text-align:center" onclick="nxToast('Почта открыта','fa-envelope')"><i class="fa-solid fa-envelope" style="font-size:26px;color:#f472b6"></i><div style="font-weight:700;color:#fff;margin-top:12px">Email</div><div style="font-size:11px;color:#8b93b0;margin-top:4px">Шаблоны · трекинг открытий</div></div>
+                <div class="nx-card" style="text-align:center" onclick="nxToast('Набор номера через SIP…','fa-phone')"><i class="fa-solid fa-phone-volume" style="font-size:26px;color:#fbbf24"></i><div style="font-weight:700;color:#fff;margin-top:12px">Телефония</div><div style="font-size:11px;color:#8b93b0;margin-top:4px">SIP · запись · расшифровка</div></div>
+              </div>
+            </div>
+
+            <!-- ANALYTICS -->
+            <div class="nx-view" id="v-analytics">
+              <div class="nx-h1">Аналитика · Прогноз выручки</div>
+              <div class="nx-sub">ИИ-прогноз на основе исторических данных и текущей воронки</div>
+              <div class="nx-card" style="cursor:default;max-width:760px">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="font-weight:700;color:#fff">Выручка по месяцам, ₽ млн</div><button class="nx-btn p" onclick="nxAsk('Что делать для роста выручки?')"><i class="fa-solid fa-wand-magic-sparkles"></i> Что делать?</button></div>
+                <div class="nx-bars">
+                  <div class="nx-bar" style="height:45%"><span>14</span><b>Июл</b></div>
+                  <div class="nx-bar" style="height:58%"><span>18</span><b>Авг</b></div>
+                  <div class="nx-bar" style="height:52%"><span>16</span><b>Сен</b></div>
+                  <div class="nx-bar" style="height:72%"><span>22</span><b>Окт</b></div>
+                  <div class="nx-bar" style="height:85%"><span>26</span><b>Ноя</b></div>
+                  <div class="nx-bar" style="height:100%;background:linear-gradient(#ec4899,#f59e0b)"><span>31</span><b>Дек*</b></div>
+                </div>
+              </div>
+              <div class="nx-grid nx-stats" style="margin-top:22px;max-width:760px">
+                <div class="nx-stat" onclick="nxAsk('Покажи риск-матрицу')"><i style="background:rgba(239,68,68,.2);color:#f87171"><i class="fa-solid fa-triangle-exclamation"></i></i><div class="nx-stat-v">2</div><div class="nx-stat-l">Сделки в зоне риска</div></div>
+                <div class="nx-stat" onclick="nxAsk('Какой канал лучший?')"><i style="background:rgba(52,211,153,.2);color:#34d399"><i class="fa-solid fa-chart-pie"></i></i><div class="nx-stat-v">3.4x</div><div class="nx-stat-l">Лучший ROI (реклама)</div></div>
+              </div>
+            </div>
+
+            <!-- AI AGENTS -->
+            <div class="nx-view" id="v-ai">
+              <div class="nx-h1">Agentic AI · Цифровые сотрудники</div>
+              <div class="nx-sub">Автономные ИИ-агенты работают за вас 24/7. Наймите нового голосом.</div>
+              <div class="nx-grid" style="grid-template-columns:repeat(2,1fr);max-width:820px">
+                <div class="nx-card nx-fc" onclick="nxToast('Агент активен','fa-robot')"><div class="nx-fc-ic" style="background:linear-gradient(135deg,#6366f1,#a855f7);color:#fff"><i class="fa-solid fa-robot"></i></div><div class="nx-fc-b"><div class="nx-fc-t">Агент «Лидоруб»</div><div class="nx-fc-d">Обрабатывает входящие лиды, квалифицирует, отправляет письма. Обработано 142 лида.</div><span class="nx-badge2" style="background:rgba(52,211,153,.2);color:#34d399;margin-top:8px"><i class="fa-solid fa-circle" style="font-size:7px"></i> Работает</span></div></div>
+                <div class="nx-card nx-fc" onclick="nxToast('Агент активен','fa-robot')"><div class="nx-fc-ic" style="background:linear-gradient(135deg,#ec4899,#f59e0b);color:#fff"><i class="fa-solid fa-comments"></i></div><div class="nx-fc-b"><div class="nx-fc-t">Агент «Поддержка 24»</div><div class="nx-fc-d">Отвечает на обращения клиентов в чате, эскалирует сложные случаи. Решено 89% тикетов.</div><span class="nx-badge2" style="background:rgba(52,211,153,.2);color:#34d399;margin-top:8px"><i class="fa-solid fa-circle" style="font-size:7px"></i> Работает</span></div></div>
+              </div>
+              <button class="nx-btn p" style="margin-top:18px;padding:12px 22px" onclick="nxAsk('Найми агента для мониторинга сайта')"><i class="fa-solid fa-microphone"></i> Нанять агента голосом</button>
+            </div>
+
+            <!-- SETTINGS -->
+            <div class="nx-view" id="v-settings">
+              <div class="nx-h1">Настройки · Безопасность</div>
+              <div class="nx-sub">RBAC, SSO, 2FA, шифрование AES-256, аудит — всё под контролем</div>
+              <div class="nx-feed" style="max-width:720px">
+                <div class="nx-card nx-fc" onclick="nxToast('2FA включена','fa-shield')"><div class="nx-fc-ic" style="background:rgba(52,211,153,.18);color:#34d399"><i class="fa-solid fa-shield-halved"></i></div><div class="nx-fc-b"><div class="nx-fc-t">Двухфакторная аутентификация</div><div class="nx-fc-d">TOTP + Push · Активна для всех пользователей</div></div></div>
+                <div class="nx-card nx-fc" onclick="nxToast('Управление ролями','fa-users-gear')"><div class="nx-fc-ic" style="background:rgba(99,102,241,.18);color:#818cf8"><i class="fa-solid fa-users-gear"></i></div><div class="nx-fc-b"><div class="nx-fc-t">Роли и права (RBAC)</div><div class="nx-fc-d">6 ролей · Field-level security · Маскировка данных</div></div></div>
+                <div class="nx-card nx-fc" onclick="nxToast('Интеграции: 1С, Jira, Google','fa-plug')"><div class="nx-fc-ic" style="background:rgba(245,158,11,.18);color:#fbbf24"><i class="fa-solid fa-plug-circle-bolt"></i></div><div class="nx-fc-b"><div class="nx-fc-t">Интеграции · Marketplace</div><div class="nx-fc-d">1С, Jira, Google Workspace, ЮKassa подключены</div></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DEAL MODAL -->
+        <div class="nx-ov" id="nxOv" onclick="if(event.target===this)nxCloseDeal()">
+          <div class="nx-modal">
+            <div class="nx-mh">
+              <div class="nx-mh-av" id="nxDealAv" style="background:linear-gradient(135deg,#6366f1,#a855f7)">Р</div>
+              <div style="flex:1"><div style="font-size:18px;font-weight:800;color:#fff" id="nxDealName">Ромашка ООО</div><div style="font-size:13px;color:#8b93b0" id="nxDealMeta">₽ 2,4М · Квалификация · 85% готовность</div></div>
+              <button class="nx-close" onclick="nxCloseDeal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="nx-tabs">
+              <div class="nx-tab on" onclick="nxTab(this,'ov')">Обзор</div>
+              <div class="nx-tab" onclick="nxTab(this,'comm')">Коммуникации</div>
+              <div class="nx-tab" onclick="nxTab(this,'tsk')">Задачи</div>
+              <div class="nx-tab" onclick="nxTab(this,'doc')">Документы</div>
+              <div class="nx-tab" onclick="nxTab(this,'hist')">История</div>
+            </div>
+            <div class="nx-mb">
+              <div class="nx-tabpane on" id="p-ov">
+                <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+                  <button class="nx-btn p" onclick="nxToast('Набираю через WebRTC…','fa-phone')"><i class="fa-solid fa-phone"></i> Позвонить</button>
+                  <button class="nx-btn" onclick="nxToast('Открываю чат','fa-message')"><i class="fa-solid fa-message"></i> Написать</button>
+                  <button class="nx-btn" onclick="nxToast('Встреча назначена','fa-calendar')"><i class="fa-solid fa-calendar-plus"></i> Встреча</button>
+                  <button class="nx-btn" onclick="nxToast('Задача создана','fa-plus')"><i class="fa-solid fa-plus"></i> Задача</button>
+                </div>
+                <div style="background:linear-gradient(135deg,rgba(139,92,246,.15),rgba(236,72,153,.1));border:1px solid rgba(139,92,246,.3);border-radius:14px;padding:15px;margin-bottom:14px">
+                  <div style="font-weight:700;color:#fff;font-size:13px;margin-bottom:6px"><i class="fa-solid fa-brain" style="color:#f472b6"></i> Рекомендация ИИ · Next Best Action</div>
+                  <div style="font-size:12.5px;color:#c5cbe0;line-height:1.5">Клиент прочитал КП. Вероятность закрытия 85%. Рекомендую позвонить сегодня и предложить скидку 10% — это увеличит шанс до 94%.</div>
+                </div>
+                <div class="nx-line"><i class="fa-solid fa-arrow-trend-up"></i> Следующий шаг: звонок в 10:00 (скрипт готов)</div>
+                <div class="nx-line"><i class="fa-solid fa-envelope-open"></i> КП прочитано вчера в 20:00</div>
+                <div class="nx-line"><i class="fa-solid fa-percent"></i> Рекомендуемая скидка: 10%</div>
+              </div>
+              <div class="nx-tabpane" id="p-comm">
+                <div class="nx-line"><i class="fa-solid fa-phone"></i> Звонок 12 мин (расшифровка) — обсудили условия, тон позитивный</div>
+                <div class="nx-line"><i class="fa-solid fa-envelope"></i> Отправлено КП · Открыто 2 раза</div>
+                <div class="nx-line"><i class="fa-brands fa-telegram"></i> Диалог в Telegram · 8 сообщений</div>
+                <div class="nx-line"><i class="fa-solid fa-face-smile" style="color:#34d399"></i> Анализ эмоций: клиент заинтересован (радость 78%)</div>
+              </div>
+              <div class="nx-tabpane" id="p-tsk">
+                <div class="nx-line"><i class="fa-solid fa-circle-check"></i> Отправить расчёт — до 16:00 · В работе</div>
+                <div class="nx-line"><i class="fa-regular fa-circle"></i> Позвонить в 10:00 · Запланировано</div>
+              </div>
+              <div class="nx-tabpane" id="p-doc">
+                <div class="nx-line"><i class="fa-solid fa-file-pdf"></i> Коммерческое предложение v2.1 · Подписано КЭП</div>
+                <div class="nx-line"><i class="fa-solid fa-file-contract"></i> Договор №445 · На согласовании</div>
+                <div class="nx-line"><i class="fa-solid fa-file-invoice"></i> Счёт №1023 · Ожидает оплаты</div>
+              </div>
+              <div class="nx-tabpane" id="p-hist">
+                <div class="nx-line"><i class="fa-solid fa-clock-rotate-left"></i> Вчера 20:00 — клиент открыл КП</div>
+                <div class="nx-line"><i class="fa-solid fa-clock-rotate-left"></i> 2 дня назад — создана сделка (ИИ-скоринг 85%)</div>
+                <div class="nx-line"><i class="fa-solid fa-clock-rotate-left"></i> 3 дня назад — первый контакт из Telegram</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI ASSISTANT -->
+        <div class="nx-ai" onclick="nxToggleAI()" id="nxAiBtn"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+        <div class="nx-ai-panel" id="nxAiPanel">
+          <div class="nx-ai-h"><i class="fa-solid fa-robot" style="color:#c084fc"></i> NEXUS AI · Всегда на связи <i class="fa-solid fa-xmark" style="margin-left:auto;cursor:pointer;color:#8b93b0" onclick="nxToggleAI()"></i></div>
+          <div class="nx-ai-msgs" id="nxMsgs">
+            <div class="nx-msg ai">Привет, Анна! Я ваш цифровой мозг NEXUS. Могу найти клиента, создать задачу, подготовить скрипт или дать инсайт. Что подскажу?</div>
+            <div style="align-self:flex-start">
+              <span class="nx-chip" onclick="nxAsk('Покажи все горячие лиды')">🔥 Горячие лиды</span>
+              <span class="nx-chip" onclick="nxAsk('Прогноз выручки')">📈 Прогноз</span>
+              <span class="nx-chip" onclick="nxAsk('Создай задачу для Петрова')">✅ Создать задачу</span>
+            </div>
+          </div>
+          <div class="nx-ai-in"><input id="nxInput" placeholder="Спросите NEXUS…" onkeydown="if(event.key==='Enter')nxSend()"/><button class="nx-ai-send" onclick="nxSend()"><i class="fa-solid fa-paper-plane"></i></button></div>
+        </div>
+
+        <div class="nx-toast" id="nxToast"><i class="fa-solid fa-check" id="nxToastIc"></i><span id="nxToastMsg"></span></div>
+      </div>
+    </div>
+
+  </div>
+  <!-- END EDITABLE: Slides -->
+
+  <!-- PROTECTED: Navigation Bar -->
+  <div class="bar">
+    <button id="btnPrev" onclick="prevSlide()" disabled title="Previous" class="btn"><i class="fa-solid fa-backward"></i></button>
+    <button id="btnSpace" onclick="nextSlide()" title="Space" class="btn" style="padding:6px 20px"><i class="fa-solid fa-play" style="font-size:11px"></i></button>
+    <button id="btnNext" onclick="nextSlide()" title="Next" class="btn"><i class="fa-solid fa-forward"></i></button>
+    <span class="counter" id="slideCounter">1 / 1</span>
+    <button id="btnFullscreen" onclick="toggleFullscreen()" title="Fullscreen (F)" class="btn"><i class="fa-solid fa-expand"></i></button>
+    <div style="position:relative" id="exportWrapper">
+      <button onclick="toggleExportMenu()" title="Export" class="btn"><i class="fa-solid fa-download"></i></button>
+      <div class="xmenu" id="exportMenu">
+        <div style="padding:6px 12px;font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.1em;font-weight:600">Скачать как</div>
+        <button class="xi" onclick="exportPPTX()"><i class="fa-solid fa-file-powerpoint" style="color:#d04423"></i>PowerPoint<span class="ext">.pptx</span></button>
+        <button class="xi" onclick="exportPDF()"><i class="fa-solid fa-file-pdf" style="color:#e44"></i>PDF<span class="ext">.pdf</span></button>
+        <button class="xi" onclick="exportImages()"><i class="fa-solid fa-image" style="color:#8b5cf6"></i>Изображения<span class="ext">.png</span></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROTECTED: Toast + Modal -->
+  <div class="toast" id="toast"></div>
+  <div class="modal-overlay" id="pptxModal" onclick="if(event.target===this)closePptxModal()">
+    <div class="modal">
+      <h3><i class="fa-solid fa-file-powerpoint" style="color:#d04423;margin-right:8px"></i>Экспорт в PPTX</h3>
+      <p>Для генерации pptx попросите нейросеть реализовать экспорт в pptx. Презентации с таким экспортом весят больше и стоят дороже. Используйте модель Max, бюджетные модели допускают ошибки.</p>
+      <button class="modal-btn primary" onclick="closePptxModal()">Понятно</button>
+    </div>
+  </div>
+
+  <!-- PROTECTED: Navigation + Export Scripts — DO NOT MODIFY -->
+  <script>
+    let cur=0; const total=1;
+    const sl=document.querySelectorAll(".slide");
+    const $=id=>document.getElementById(id);
+    const bPrev=$("btnPrev"),bNext=$("btnNext"),bSpace=$("btnSpace"),bFs=$("btnFullscreen");
+    const counter=$("slideCounter"),prog=$("progressFill");
+
+    function upd(){
+      sl.forEach((s,i)=>{s.classList.remove("active","prev");if(i===cur)s.classList.add("active");else if(i<cur)s.classList.add("prev");});
+      bPrev.disabled=cur===0;bNext.disabled=bSpace.disabled=cur===total-1;
+      counter.textContent=cur+1+" / "+total;prog.style.width=((cur+1)/total)*100+"%";
+    }
+    function go(d){const n=cur+d;if(n>=0&&n<total){cur=n;upd();}}
+    function nextSlide(){go(1);}
+    function prevSlide(){go(-1);}
+    function toggleFullscreen(){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen().catch(()=>{});}
+    function toggleExportMenu(){xMenu.classList.toggle("open");}
+
+    document.addEventListener("fullscreenchange",()=>{bFs.style.opacity=document.fullscreenElement?"0.6":"1";});
+    document.addEventListener("click",e=>{if(!xWrap.contains(e.target))xMenu.classList.remove("open");});
+    document.addEventListener("keydown",e=>{
+      const m={ArrowRight:1,PageDown:1," ":1,ArrowLeft:-1,PageUp:-1};
+      if(m[e.key]!==undefined){e.preventDefault();go(m[e.key]);}
+      else if(e.key==="Home"){e.preventDefault();cur=0;upd();}
+      else if(e.key==="End"){e.preventDefault();cur=total-1;upd();}
+      else if(e.key==="f"||e.key==="F"){e.preventDefault();toggleFullscreen();}
+    });
+
+    const xMenu=$("exportMenu"),xWrap=$("exportWrapper");
+    upd();
+
+    /* ===== NEXUS CRM interactivity ===== */
+    function nxGo(v){
+      document.querySelectorAll('.nx-view').forEach(e=>e.classList.remove('show'));
+      const el=document.getElementById('v-'+v); if(el)el.classList.add('show');
+      document.querySelectorAll('.nx-nav').forEach(n=>n.classList.toggle('on',n.dataset.v===v));
+      document.querySelector('.nx-body').scrollTop=0;
+    }
+    const nxDeals=[
+      {n:'Ромашка ООО',m:'₽ 2,4М · Квалификация · 85% готовность',a:'Р',c:'linear-gradient(135deg,#ec4899,#a855f7)'},
+      {n:'Вектор',m:'₽ 1,1М · Первый контакт · 42%',a:'В',c:'linear-gradient(135deg,#6366f1,#3b82f6)'},
+      {n:'ТехноПром',m:'₽ 8,5М · Переговоры · 67%',a:'Т',c:'linear-gradient(135deg,#f59e0b,#ef4444)'},
+      {n:'СтройГрупп',m:'₽ 4,2М · Обсуждение · 71%',a:'С',c:'linear-gradient(135deg,#10b981,#059669)'},
+      {n:'МегаТрейд',m:'₽ 6,0М · На согласовании · 92%',a:'М',c:'linear-gradient(135deg,#8b5cf6,#6366f1)'},
+      {n:'Финам Плюс',m:'₽ 3,3М · Выиграно · Оплачено',a:'Ф',c:'linear-gradient(135deg,#34d399,#10b981)'}
+    ];
+    function nxDeal(i){
+      const d=nxDeals[i]||nxDeals[0];
+      $('nxDealName').textContent=d.n; $('nxDealMeta').textContent=d.m;
+      const av=$('nxDealAv'); av.textContent=d.a; av.style.background=d.c;
+      $('nxOv').classList.add('show');
+    }
+    function nxCloseDeal(){$('nxOv').classList.remove('show');}
+    function nxTab(el,id){
+      el.parentElement.querySelectorAll('.nx-tab').forEach(t=>t.classList.remove('on'));
+      el.classList.add('on');
+      document.querySelectorAll('.nx-tabpane').forEach(p=>p.classList.remove('on'));
+      $('p-'+id).classList.add('on');
+    }
+    let nxTt;
+    function nxToast(msg,ic){
+      $('nxToastMsg').textContent=msg;
+      $('nxToastIc').className='fa-solid '+(ic||'fa-check');
+      const t=$('nxToast'); t.classList.add('show');
+      clearTimeout(nxTt); nxTt=setTimeout(()=>t.classList.remove('show'),2600);
+    }
+    function nxToggleAI(){
+      const p=$('nxAiPanel'); p.classList.toggle('show');
+      $('nxAiBtn').style.transform=p.classList.contains('show')?'scale(.9) rotate(45deg)':'';
+    }
+    const nxReplies={
+      'горячие':'🔥 Нашла 3 горячих лида: Ромашка (85%), МегаТрейд (92%), СтройГрупп (71%). Ромашке рекомендую позвонить прямо сейчас!',
+      'прогноз':'📈 Прогноз выручки на декабрь: ₽ 31М (доверительный интервал 28–34М). Рост +19% к ноябрю. План будет перевыполнен на 12%.',
+      'задач':'✅ Готово! Создала задачу «Связаться с клиентом» для Петра Смирнова со сроком на завтра. Уведомление отправлено.',
+      'скрипт':'📝 Скрипт для Ромашки: 1) Поблагодарите за интерес к КП. 2) Уточните бюджет. 3) Предложите скидку 10% при заключении на этой неделе. 4) Договоритесь о встрече.',
+      'риск':'⚠️ 2 сделки в зоне риска: ТехноПром (застой 5 дней) и Вектор (нет ответа). Рекомендую активировать сценарий удержания.',
+      'канал':'📊 Лучший канал — платная реклама с ROI 3.4x. Соцсети дают 2.1x, сарафан 1.8x. Рекомендую увеличить бюджет на рекламу на 20%.',
+      'агент':'🤖 Нанимаю нового агента «Веб-Наблюдатель». Он будет мониторить поведение клиентов на сайте и отправлять персонализированные письма. Активирую…',
+      'выручк':'💡 Для роста выручки: 1) Закрыть Ромашку и МегаТрейд (+₽8,4М). 2) Реанимировать ТехноПром. 3) Запустить апсейл для Финам Плюс.'
+    };
+    function nxReply(q){
+      const l=q.toLowerCase();
+      for(const k in nxReplies){if(l.includes(k))return nxReplies[k];}
+      return 'Принято! Анализирую запрос «'+q+'» по единому профилю 360° и всем каналам. Секунду… Готово — данные обновлены в вашей ленте.';
+    }
+    function nxPush(txt,who){
+      const m=document.createElement('div'); m.className='nx-msg '+who; m.textContent=txt;
+      const box=$('nxMsgs'); box.appendChild(m); box.scrollTop=box.scrollHeight;
+    }
+    function nxAsk(q){
+      if(!$('nxAiPanel').classList.contains('show'))nxToggleAI();
+      nxPush(q,'me');
+      setTimeout(()=>nxPush(nxReply(q),'ai'),450);
+    }
+    function nxSend(){
+      const inp=$('nxInput'); const v=inp.value.trim(); if(!v)return;
+      inp.value=''; nxAsk(v);
+    }
+
+    function showToast(msg,icon="fa-circle-check"){const t=$("toast");t.innerHTML='<i class="fa-solid '+icon+'" style="color:#4ade80"></i> '+msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),3000);}
+    function downloadBlob(b,name){const u=URL.createObjectURL(b),a=document.createElement("a");a.href=u;a.download=name;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(u),1000);}
+
+    async function captureSlides(){
+      const saved=cur,out=[];
+      for(let i=0;i<total;i++){
+        sl.forEach((s,j)=>{s.style.transition="none";s.classList.remove("active","prev");if(j===i)s.classList.add("active");else if(j<i)s.classList.add("prev");});
+        void sl[i].offsetHeight;await new Promise(r=>setTimeout(r,150));
+        const cv=await html2canvas(sl[i],{scale:2,useCORS:true,backgroundColor:null});
+        out.push(cv);
+      }
+      sl.forEach(s=>s.style.transition="");cur=saved;upd();
+      return out;
+    }
+
+    function exportPPTX(){xMenu.classList.remove("open");$("pptxModal").classList.add("open");}
+    function closePptxModal(){$("pptxModal").classList.remove("open");}
+
+    async function exportPDF(){
+      xMenu.classList.remove("open");showToast("Подготовка PDF...","fa-spinner fa-spin");
+      try{
+        const caps=await captureSlides();
+        const fr=document.createElement("iframe");fr.style.cssText="position:fixed;left:-9999px;top:0;width:0;height:0;border:none;";document.body.appendChild(fr);
+        let h='<!DOCTYPE html><html><head><title>PDF</title><style>@page{size:landscape;margin:0}*{margin:0;padding:0}.p{width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;page-break-after:always;background:#fff}.p:last-child{page-break-after:auto}.p img{max-width:100%;max-height:100%}</style></head><body>';
+        for(const c of caps)h+='<div class="p"><img src="'+c.toDataURL("image/jpeg",.92)+'"></div>';
+        h+="</body></html>";fr.contentDocument.open();fr.contentDocument.write(h);fr.contentDocument.close();
+        await new Promise(r=>setTimeout(r,500));fr.contentWindow.print();
+        setTimeout(()=>document.body.removeChild(fr),10000);showToast("Выберите «Сохранить как PDF»","fa-circle-info");
+      }catch(e){showToast("Ошибка: "+e.message,"fa-circle-xmark");}
+    }
+
+    async function exportImages(){
+      xMenu.classList.remove("open");showToast("Генерация изображений...","fa-spinner fa-spin");
+      try{const caps=await captureSlides();for(let i=0;i<caps.length;i++){const b=await new Promise(r=>caps[i].toBlob(r,"image/png"));downloadBlob(b,"slide-"+(i+1)+".png");await new Promise(r=>setTimeout(r,300));}showToast(caps.length+" изображений скачано!");
+      }catch(e){showToast("Ошибка: "+e.message,"fa-circle-xmark");}
+    }
+  </script>
+</body>
+</html>

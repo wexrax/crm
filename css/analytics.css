@@ -1,0 +1,36 @@
+/* Analytics */
+.dashboard { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+.panel {
+  background: linear-gradient(160deg, rgba(255,255,255,0.055), rgba(255,255,255,0.02));
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 18px; padding: 22px;
+}
+.panel-title { font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+.panel-sub { font-size: 12.5px; color: #8b93b0; margin-bottom: 18px; }
+
+.bar-chart { display: flex; align-items: flex-end; gap: 12px; height: 180px; padding: 16px 0; }
+.bar-item {
+  flex: 1; background: linear-gradient(#6366f1, #a855f7);
+  border-radius: 8px 8px 0 0; position: relative;
+  transition: 0.4s; cursor: pointer; min-height: 8px;
+}
+.bar-item:hover { filter: brightness(1.2); }
+.bar-item span {
+  position: absolute; top: -22px; left: 0; right: 0;
+  text-align: center; font-size: 11px; font-weight: 700; color: #fff;
+}
+.bar-item b {
+  position: absolute; bottom: -24px; left: 0; right: 0;
+  text-align: center; font-size: 11px; color: #8b93b0; font-weight: 500;
+}
+
+.funnel-stage { margin-bottom: 12px; }
+.funnel-info { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px; color: #9aa2bd; }
+.funnel-bar {
+  height: 34px; border-radius: 8px;
+  display: flex; align-items: center; padding: 0 12px;
+  color: #fff; font-size: 12.5px; font-weight: 600;
+  transition: width 0.8s var(--ease-spring);
+}
+
+@media (max-width: 900px) { .dashboard { grid-template-columns: 1fr; } }

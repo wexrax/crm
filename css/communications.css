@@ -1,0 +1,16 @@
+/* Communications */
+.comms-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; max-width: 820px; }
+.comm-card {
+  background: linear-gradient(160deg, rgba(255,255,255,0.055), rgba(255,255,255,0.02));
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 18px; padding: 20px; text-align: center;
+  transition: 0.3s; cursor: pointer;
+}
+.comm-card:hover {
+  border-color: rgba(139,92,246,0.35);
+  transform: translateY(-3px);
+  box-shadow: 0 14px 36px rgba(0,0,0,0.35);
+}
+.comm-card-icon { font-size: 26px; margin-bottom: 12px; }
+.comm-card-title { font-weight: 700; color: #fff; margin-bottom: 4px; }
+.comm-card-desc { font-size: 11px; color: #8b93b0; }

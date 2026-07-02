@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <!-- PROTECTED: meta type -->
+    <meta name="type" value="app" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS — Операционная система для бизнеса</title>
+    <meta property="og:title" content="NEXUS CRM">
+    <meta property="og:description" content="Умная CRM с лентой событий, сделками, задачами, аналитикой и AI-подсказками.">
+    <meta property="og:type" content="website">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root{
+            --bg:#0e0f13;
+            --surface:#16181f;
+            --surface-2:#1d2029;
+            --surface-3:#252932;
+            --border:#2a2e39;
+            --text:#e7e9ee;
+            --text-dim:#9aa0ad;
+            --text-faint:#646b7a;
+            --accent:#6c5ce7;
+            --accent-soft:rgba(108,92,231,.14);
+            --green:#2ecc71;
+            --amber:#f1a33c;
+            --red:#ff6b6b;
+            --blue:#4da3ff;
+            --radius:16px;
+        }
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{
+            font-family:'Inter',sans-serif;
+            background:var(--bg);
+            color:var(--text);
+            height:100vh;
+            overflow:hidden;
+        }
+        ::-webkit-scrollbar{width:9px;height:9px}
+        ::-webkit-scrollbar-thumb{background:var(--surface-3);border-radius:6px}
+        ::-webkit-scrollbar-track{background:transparent}
+        h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;font-weight:600}
+
+        .app{display:grid;grid-template-columns:78px 1fr;height:100vh}
+
+        /* Sidebar */
+        .sidebar{
+            background:var(--surface);
+            border-right:1px solid var(--border);
+            display:flex;flex-direction:column;align-items:center;
+            padding:20px 0;gap:6px;
+        }
+        .logo{
+            width:44px;height:44px;border-radius:13px;
+            background:linear-gradient(135deg,var(--accent),#9b8cff);
+            display:grid;place-items:center;color:#fff;font-size:20px;
+            font-family:'Space Grotesk';font-weight:700;margin-bottom:22px;
+            box-shadow:0 8px 24px rgba(108,92,231,.35);
+        }
+        .nav-item{
+            width:46px;height:46px;border-radius:13px;
+            display:grid;place-items:center;color:var(--text-faint);
+            font-size:18px;cursor:pointer;position:relative;transition:.2s;
+        }
+        .nav-item:hover{background:var(--surface-2);color:var(--text)}
+        .nav-item.active{background:var(--accent-soft);color:var(--accent)}
+        .nav-item .tip{
+            position:absolute;left:56px;top:50%;transform:translateY(-50%);
+            background:var(--surface-3);color:var(--text);font-size:12.5px;
+            padding:6px 11px;border-radius:8px;white-space:nowrap;
+            opacity:0;pointer-events:none;transition:.15s;z-index:50;
+            border:1px solid var(--border);font-family:'Inter';
+        }
+        .nav-item:hover .tip{opacity:1;left:60px}
+        .nav-spacer{flex:1}
+        .nav-avatar{
+            width:42px;height:42px;border-radius:50%;
+            background:linear-gradient(135deg,#f1a33c,#ff6b6b);
+            display:grid;place-items:center;color:#fff;font-weight:600;cursor:pointer;
+        }
+
+        /* Main */
+        .main{display:flex;flex-direction:column;overflow:hidden}
+        .topbar{
+            height:66px;border-bottom:1px solid var(--border);
+            display:flex;align-items:center;gap:18px;padding:0 30px;flex-shrink:0;
+        }
+        .page-title{font-size:20px}
+        .page-sub{color:var(--text-dim);font-size:13px;margin-top:2px}
+        .search-box{
+            margin-left:auto;display:flex;align-items:center;gap:10px;
+            background:var(--surface-2);border:1px solid var(--border);
+            border-radius:11px;padding:9px 15px;width:340px;transition:.2s;
+        }
+        .search-box:focus-within{border-color:var(--accent);width:400px}
+        .search-box i{color:var(--text-faint);font-size:14px}
+        .search-box input{
+            background:none;border:none;color:var(--text);outline:none;
+            font-family:'Inter';font-size:13.5px;width:100%;
+        }
+        .search-box input::placeholder{color:var(--text-faint)}
+        .icon-btn{
+            width:40px;height:40px;border-radius:11px;background:var(--surface-2);
+            border:1px solid var(--border);color:var(--text-dim);cursor:pointer;
+            display:grid;place-items:center;transition:.2s;position:relative;
+        }
+        .icon-btn:hover{color:var(--text);border-color:var(--accent)}
+        .dot{position:absolute;top:9px;right:9px;width:7px;height:7px;border-radius:50%;background:var(--red)}
+
+        .content{flex:1;overflow-y:auto;padding:30px;position:relative}
+        .view{display:none;animation:fade .35s ease}
+        .view.active{display:block}
+        @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+        /* Feed */
+        .feed{max-width:760px;margin:0 auto}
+        .feed-group-label{
+            color:var(--text-faint);font-size:12px;font-weight:600;text-transform:uppercase;
+            letter-spacing:.7px;margin:26px 4px 14px;
+        }
+        .feed-group-label:first-child{margin-top:0}
+        .card{
+            background:var(--surface);border:1px solid var(--border);
+            border-radius:var(--radius);padding:20px;margin-bottom:14px;
+            transition:.2s;position:relative;overflow:hidden;
+        }
+        .card:hover{border-color:#3a3f4d;transform:translateY(-2px);box-shadow:0 12px 30px rgba(0,0,0,.25)}
+        .card-head{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+        .card-ico{
+            width:44px;height:44px;border-radius:12px;display:grid;place-items:center;
+            font-size:18px;flex-shrink:0;
+        }
+        .card-title{font-weight:600;font-size:15px;font-family:'Space Grotesk'}
+        .card-meta{color:var(--text-dim);font-size:12.5px;margin-top:2px}
+        .card-body{color:var(--text-dim);font-size:14px;line-height:1.6}
+        .card-tag{
+            font-size:11px;padding:3px 9px;border-radius:20px;font-weight:600;
+            margin-left:auto;flex-shrink:0;
+        }
+        .ai-card{border-color:rgba(108,92,231,.4);background:linear-gradient(135deg,rgba(108,92,231,.09),transparent)}
+        .card-actions{display:flex;gap:9px;margin-top:15px}
+        .btn{
+            border:none;cursor:pointer;font-family:'Inter';font-weight:600;font-size:13px;
+            padding:9px 16px;border-radius:10px;transition:.2s;display:inline-flex;
+            align-items:center;gap:7px;
+        }
+        .btn-primary{background:var(--accent);color:#fff}
+        .btn-primary:hover{background:#5b4bd6}
+        .btn-ghost{background:var(--surface-2);color:var(--text-dim);border:1px solid var(--border)}
+        .btn-ghost:hover{color:var(--text);border-color:#3a3f4d}
+
+        /* Deals kanban */
+        .kanban{display:flex;gap:16px;overflow-x:auto;padding-bottom:10px}
+        .col{
+            background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+            min-width:290px;width:290px;padding:16px;flex-shrink:0;
+        }
+        .col-head{display:flex;align-items:center;gap:9px;margin-bottom:16px}
+        .col-head h4{font-size:14px}
+        .col-count{
+            background:var(--surface-3);color:var(--text-dim);font-size:11px;
+            padding:2px 8px;border-radius:20px;font-weight:600;
+        }
+        .col-sum{margin-left:auto;color:var(--text-faint);font-size:12px}
+        .deal{
+            background:var(--surface-2);border:1px solid var(--border);border-radius:12px;
+            padding:14px;margin-bottom:11px;cursor:grab;transition:.2s;
+        }
+        .deal:hover{border-color:var(--accent);transform:translateY(-2px)}
+        .deal.dragging{opacity:.4}
+        .deal-company{font-weight:600;font-size:14px}
+        .deal-amount{color:var(--green);font-weight:600;font-size:15px;font-family:'Space Grotesk';margin:8px 0}
+        .deal-foot{display:flex;align-items:center;gap:8px;margin-top:10px}
+        .deal-owner{
+            width:26px;height:26px;border-radius:50%;display:grid;place-items:center;
+            font-size:11px;font-weight:600;color:#fff;
+        }
+        .prob{margin-left:auto;font-size:11px;color:var(--text-faint)}
+        .prob b{color:var(--text)}
+
+        /* Tasks */
+        .task-list{max-width:820px}
+        .task{
+            display:flex;align-items:center;gap:15px;background:var(--surface);
+            border:1px solid var(--border);border-radius:13px;padding:15px 18px;margin-bottom:11px;transition:.2s;
+        }
+        .task:hover{border-color:#3a3f4d}
+        .check{
+            width:22px;height:22px;border-radius:7px;border:2px solid var(--text-faint);
+            cursor:pointer;flex-shrink:0;transition:.2s;display:grid;place-items:center;color:transparent;
+        }
+        .check:hover{border-color:var(--accent)}
+        .task.done .check{background:var(--green);border-color:var(--green);color:#fff}
+        .task.done .task-name{text-decoration:line-through;color:var(--text-faint)}
+        .task-name{font-weight:500;font-size:14.5px}
+        .task-sub{color:var(--text-dim);font-size:12.5px;margin-top:3px}
+        .task-badge{margin-left:auto;font-size:11px;padding:4px 10px;border-radius:20px;font-weight:600;flex-shrink:0}
+
+        /* Team */
+        .grid-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+        .member{
+            background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+            padding:22px;text-align:center;transition:.2s;
+        }
+        .member:hover{border-color:#3a3f4d;transform:translateY(-3px)}
+        .member-av{
+            width:64px;height:64px;border-radius:50%;margin:0 auto 14px;display:grid;place-items:center;
+            font-size:22px;font-weight:600;color:#fff;position:relative;
+        }
+        .member-av .status{
+            position:absolute;bottom:2px;right:2px;width:15px;height:15px;border-radius:50%;
+            border:3px solid var(--surface);
+        }
+        .member-name{font-weight:600;font-size:15px}
+        .member-role{color:var(--text-dim);font-size:12.5px;margin-top:3px}
+        .member-stats{display:flex;justify-content:space-around;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)}
+        .member-stats div{font-size:11px;color:var(--text-faint)}
+        .member-stats b{display:block;font-size:17px;color:var(--text);font-family:'Space Grotesk';margin-bottom:2px}
+
+        /* Calendar */
+        .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+        .cal-dow{color:var(--text-faint);font-size:12px;font-weight:600;text-align:center;padding-bottom:6px}
+        .cal-day{
+            background:var(--surface);border:1px solid var(--border);border-radius:11px;
+            min-height:96px;padding:9px;transition:.2s;cursor:pointer;
+        }
+        .cal-day:hover{border-color:#3a3f4d}
+        .cal-day.other{opacity:.35}
+        .cal-day.today{border-color:var(--accent);background:var(--accent-soft)}
+        .cal-num{font-size:13px;font-weight:600;margin-bottom:6px}
+        .cal-ev{
+            font-size:10.5px;padding:3px 6px;border-radius:6px;margin-bottom:4px;
+            overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500;
+        }
+
+        /* Analytics */
+        .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
+        .stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+        .stat-ico{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;font-size:16px;margin-bottom:12px}
+        .stat-val{font-size:28px;font-family:'Space Grotesk';font-weight:700}
+        .stat-label{color:var(--text-dim);font-size:12.5px;margin-top:2px}
+        .stat-trend{font-size:12px;font-weight:600;margin-top:8px}
+        .dash-grid{display:grid;grid-template-columns:2fr 1fr;gap:16px}
+        .panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px}
+        .panel h3{font-size:16px;margin-bottom:4px}
+        .panel .sub{color:var(--text-dim);font-size:12.5px;margin-bottom:18px}
+        .bars{display:flex;align-items:flex-end;gap:14px;height:200px}
+        .bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;height:100%}
+        .bar{
+            width:100%;background:linear-gradient(180deg,var(--accent),#9b8cff);
+            border-radius:8px 8px 0 0;margin-top:auto;transition:.6s cubic-bezier(.2,.8,.2,1);position:relative;
+        }
+        .bar-label{color:var(--text-faint);font-size:11px}
+        .funnel-stage{margin-bottom:12px}
+        .funnel-bar{height:34px;border-radius:8px;display:flex;align-items:center;padding:0 12px;color:#fff;font-size:12.5px;font-weight:600}
+        .funnel-info{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;color:var(--text-dim)}
+
+        /* Modal */
+        .overlay{
+            position:fixed;inset:0;background:rgba(6,7,10,.7);backdrop-filter:blur(4px);
+            display:none;align-items:center;justify-content:center;z-index:100;padding:30px;
+        }
+        .overlay.open{display:flex;animation:fade .2s}
+        .modal{
+            background:var(--surface);border:1px solid var(--border);border-radius:22px;
+            width:100%;max-width:900px;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;
+            animation:pop .25s cubic-bezier(.2,.8,.2,1);
+        }
+        @keyframes pop{from{transform:scale(.96);opacity:0}to{transform:scale(1);opacity:1}}
+        .modal-head{padding:26px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px}
+        .modal-logo{width:54px;height:54px;border-radius:14px;display:grid;place-items:center;font-size:20px;font-weight:600;color:#fff}
+        .modal-title{font-size:20px}
+        .modal-sub{color:var(--text-dim);font-size:13px;margin-top:3px}
+        .modal-amount{margin-left:auto;text-align:right}
+        .modal-amount b{font-size:24px;font-family:'Space Grotesk';color:var(--green)}
+        .modal-close{position:absolute;top:22px;right:22px;cursor:pointer;color:var(--text-dim);font-size:20px;z-index:2}
+        .modal-close:hover{color:var(--text)}
+        .tabs{display:flex;gap:4px;padding:0 28px;border-bottom:1px solid var(--border)}
+        .tab{
+            padding:14px 16px;color:var(--text-dim);font-size:13.5px;font-weight:500;cursor:pointer;
+            border-bottom:2px solid transparent;transition:.2s;
+        }
+        .tab:hover{color:var(--text)}
+        .tab.active{color:var(--accent);border-color:var(--accent)}
+        .modal-body{padding:26px 28px;overflow-y:auto}
+        .tabpane{display:none}
+        .tabpane.active{display:block;animation:fade .25s}
+        .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px}
+        .info-item{background:var(--surface-2);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+        .info-item span{color:var(--text-faint);font-size:11.5px;text-transform:uppercase;letter-spacing:.5px}
+        .info-item b{display:block;font-size:15px;margin-top:6px;font-weight:600}
+        .timeline-item{display:flex;gap:14px;padding-bottom:20px;position:relative}
+        .timeline-item::before{content:'';position:absolute;left:15px;top:34px;bottom:-6px;width:2px;background:var(--border)}
+        .timeline-item:last-child::before{display:none}
+        .tl-ico{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;font-size:13px;flex-shrink:0}
+        .tl-body b{font-size:13.5px}
+        .tl-body p{color:var(--text-dim);font-size:13px;margin-top:3px;line-height:1.5}
+        .tl-time{color:var(--text-faint);font-size:11.5px;margin-top:4px}
+        .file-row{display:flex;align-items:center;gap:13px;padding:13px 15px;background:var(--surface-2);border:1px solid var(--border);border-radius:11px;margin-bottom:10px;transition:.2s;cursor:pointer}
+        .file-row:hover{border-color:var(--accent)}
+        .file-ico{width:38px;height:38px;border-radius:9px;display:grid;place-items:center;font-size:16px;background:var(--surface-3)}
+        .ai-box{
+            background:linear-gradient(135deg,var(--accent-soft),transparent);
+            border:1px solid rgba(108,92,231,.35);border-radius:14px;padding:18px;margin-top:8px;
+        }
+        .ai-box .ai-head{display:flex;align-items:center;gap:10px;margin-bottom:12px;color:var(--accent);font-weight:600;font-size:14px}
+        .ai-rec{display:flex;gap:11px;padding:10px 0;color:var(--text-dim);font-size:13.5px;line-height:1.5;border-bottom:1px solid var(--border)}
+        .ai-rec:last-child{border:none}
+        .ai-rec i{color:var(--accent);margin-top:2px}
+
+        .avatar-sm{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:600;color:#fff}
+
+        /* toast */
+        .toast{
+            position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(120px);
+            background:var(--surface-3);border:1px solid var(--border);color:var(--text);
+            padding:13px 22px;border-radius:12px;font-size:13.5px;z-index:200;transition:.4s cubic-bezier(.2,.8,.2,1);
+            display:flex;align-items:center;gap:10px;box-shadow:0 12px 30px rgba(0,0,0,.4);
+        }
+        .toast.show{transform:translateX(-50%) translateY(0)}
+        .toast i{color:var(--green)}
+        .empty{text-align:center;color:var(--text-faint);padding:60px;font-size:14px}
+    </style>
+</head>
+<body>
+<div class="app">
+    <aside class="sidebar">
+        <div class="logo">N</div>
+        <div class="nav-item active" data-view="feed"><i class="fa-solid fa-house"></i><span class="tip">Домой</span></div>
+        <div class="nav-item" data-view="deals"><i class="fa-solid fa-handshake"></i><span class="tip">Сделки</span></div>
+        <div class="nav-item" data-view="tasks"><i class="fa-solid fa-list-check"></i><span class="tip">Задачи</span></div>
+        <div class="nav-item" data-view="team"><i class="fa-solid fa-users"></i><span class="tip">Команда</span></div>
+        <div class="nav-item" data-view="calendar"><i class="fa-solid fa-calendar-days"></i><span class="tip">Календарь</span></div>
+        <div class="nav-item" data-view="analytics"><i class="fa-solid fa-chart-line"></i><span class="tip">Аналитика</span></div>
+        <div class="nav-spacer"></div>
+        <div class="nav-item"><i class="fa-solid fa-gear"></i><span class="tip">Настройки</span></div>
+        <div class="nav-avatar">АК</div>
+    </aside>
+
+    <main class="main">
+        <div class="topbar">
+            <div>
+                <div class="page-title" id="pageTitle">Умная лента</div>
+                <div class="page-sub" id="pageSub">Всё важное — в одном потоке</div>
+            </div>
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input id="globalSearch" placeholder="Найди клиента, задачу или спроси у NEXUS...">
+            </div>
+            <div class="icon-btn"><i class="fa-solid fa-microphone"></i></div>
+            <div class="icon-btn"><i class="fa-solid fa-bell"></i><span class="dot"></span></div>
+        </div>
+
+        <div class="content">
+            <!-- FEED -->
+            <div class="view active" id="view-feed"><div class="feed" id="feed"></div></div>
+            <!-- DEALS -->
+            <div class="view" id="view-deals"><div class="kanban" id="kanban"></div></div>
+            <!-- TASKS -->
+            <div class="view" id="view-tasks"><div class="task-list" id="taskList"></div></div>
+            <!-- TEAM -->
+            <div class="view" id="view-team"><div class="grid-cards" id="teamGrid"></div></div>
+            <!-- CALENDAR -->
+            <div class="view" id="view-calendar">
+                <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
+                    <h2 style="font-size:20px" id="calTitle">Октябрь 2026</h2>
+                    <div style="margin-left:auto;display:flex;gap:8px">
+                        <div class="icon-btn" onclick="shiftMonth(-1)"><i class="fa-solid fa-chevron-left"></i></div>
+                        <div class="icon-btn" onclick="shiftMonth(1)"><i class="fa-solid fa-chevron-right"></i></div>
+                    </div>
+                </div>
+                <div class="cal-grid" id="calGrid"></div>
+            </div>
+            <!-- ANALYTICS -->
+            <div class="view" id="view-analytics">
+                <div class="stat-row" id="statRow"></div>
+                <div class="dash-grid">
+                    <div class="panel">
+                        <h3>Выручка по месяцам</h3>
+                        <div class="sub">Прогноз с доверительным интервалом · 2026</div>
+                        <div class="bars" id="bars"></div>
+                    </div>
+                    <div class="panel">
+                        <h3>Воронка продаж</h3>
+                        <div class="sub">Текущий квартал</div>
+                        <div id="funnel"></div>
+                    </div>
+                </div>
+                <div class="ai-box" style="margin-top:16px">
+                    <div class="ai-head"><i class="fa-solid fa-wand-magic-sparkles"></i> Инсайт NEXUS AI</div>
+                    <div class="ai-rec"><i class="fa-solid fa-triangle-exclamation" style="color:var(--amber)"></i> План по выручке выполняется на 85%. Есть риск по 2 сделкам на стадии «Переговоры» — рекомендуется вмешаться до конца недели.</div>
+                    <div class="ai-rec"><i class="fa-solid fa-arrow-trend-up"></i> Канал «Реклама» приносит лиды с самой высокой конверсией (34%). Стоит увеличить бюджет.</div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
+<div class="toast" id="toast"><i class="fa-solid fa-check-circle"></i><span id="toastText"></span></div>
+
+<script>
+/* ============ DATA ============ */
+const avatarColors=['#6c5ce7','#f1a33c','#2ecc71','#4da3ff','#ff6b6b','#00cec9'];
+function initials(n){return n.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase()}
+function color(str){let h=0;for(let c of str)h+=c.charCodeAt(0);return avatarColors[h%avatarColors.length]}
+function money(n){return new Intl.NumberFormat('ru-RU').format(n)+' ₽'}
+
+const stages=[
+    {id:'lead',name:'Лид',color:'#4da3ff'},
+    {id:'qual',name:'Квалификация',color:'#00cec9'},
+    {id:'nego',name:'Переговоры',color:'#f1a33c'},
+    {id:'contract',name:'Договор',color:'#9b8cff'},
+    {id:'won',name:'Закрыта',color:'#2ecc71'},
+];
+
+let deals=[
+    {id:1,company:'Ромашка ООО',amount:5400000,stage:'nego',owner:'Анна Ковалёва',prob:72,contact:'Игорь Смирнов',phone:'+7 916 234-11-22',city:'Москва',industry:'Ритейл'},
+    {id:2,company:'ТехноСфера',amount:2100000,stage:'qual',owner:'Дмитрий Орлов',prob:45,contact:'Мария Петрова',phone:'+7 903 555-01-09',city:'Санкт-Петербург',industry:'IT'},
+    {id:3,company:'ГринЛайт',amount:8900000,stage:'contract',owner:'Анна Ковалёва',prob:88,contact:'Олег Кузнецов',phone:'+7 921 777-33-44',city:'Москва',industry:'Энергетика'},
+    {id:4,company:'Вектор Групп',amount:1200000,stage:'lead',owner:'Елена Соколова',prob:20,contact:'Павел Новиков',phone:'+7 985 100-20-30',city:'Казань',industry:'Логистика'},
+    {id:5,company:'АкваСтрой',amount:6700000,stage:'nego',owner:'Дмитрий Орлов',prob:58,contact:'Наталья Волкова',phone:'+7 926 848-77-11',city:'Москва',industry:'Строительство'},
+    {id:6,company:'МедиаПлюс',amount:3300000,stage:'won',owner:'Елена Соколова',prob:100,contact:'Сергей Лебедев',phone:'+7 917 222-88-99',city:'Екатеринбург',industry:'Медиа'},
+    {id:7,company:'Финмакс',amount:14500000,stage:'lead',owner:'Анна Ковалёва',prob:30,contact:'Виктор Соловьёв',phone:'+7 999 004-55-66',city:'Москва',industry:'Финансы'},
+    {id:8,company:'БиоФарм',amount:4200000,stage:'qual',owner:'Елена Соколова',prob:50,contact:'Ирина Морозова',phone:'+7 963 321-45-67',city:'Новосибирск',industry:'Фарма'},
+];
+
+let tasks=[
+    {id:1,name:'Отправить КП компании «Ромашка»',sub:'Сделка · Ромашка ООО · до 16:00',status:'work',done:false},
+    {id:2,name:'Согласовать договор с юристом',sub:'Сделка · ГринЛайт · на согласовании',status:'review',done:false},
+    {id:3,name:'Позвонить клиенту «ТехноСфера»',sub:'Уточнить бюджет проекта · сегодня',status:'work',done:false},
+    {id:4,name:'Подготовить презентацию для «Финмакс»',sub:'Сделка · Финмакс · завтра',status:'work',done:false},
+    {id:5,name:'Выставить счёт «МедиаПлюс»',sub:'Сделка закрыта · выполнено',status:'done',done:true},
+    {id:6,name:'Провести демо продукта «Вектор Групп»',sub:'Встреча · четверг 14:00',status:'work',done:false},
+    {id:7,name:'Обновить контактные данные «АкваСтрой»',sub:'Мастер чистоты данных · выполнено',status:'done',done:true},
+];
+const taskBadges={work:{t:'В работе',c:'var(--blue)'},review:{t:'Согласование',c:'var(--amber)'},done:{t:'Выполнено',c:'var(--green)'}};
+
+const team=[
+    {name:'Анна Ковалёва',role:'Руководитель отдела',status:'online',deals:3,calls:47,tasks:8},
+    {name:'Дмитрий Орлов',role:'Менеджер продаж',status:'online',deals:2,calls:38,tasks:5},
+    {name:'Елена Соколова',role:'Менеджер продаж',status:'away',deals:3,calls:41,tasks:6},
+    {name:'Пётр Васильев',role:'CEO',status:'online',deals:0,calls:12,tasks:3},
+    {name:'Ольга Зайцева',role:'Маркетинг',status:'offline',deals:0,calls:9,tasks:4},
+    {name:'Максим Титов',role:'Юрист',status:'away',deals:0,calls:5,tasks:7},
+];
+const statusColor={online:'#2ecc71',away:'#f1a33c',offline:'#646b7a'};
+
+const feedItems=[
+    {group:'Сегодня',type:'ai',ico:'fa-wand-magic-sparkles',icoColor:'var(--accent)',icoBg:'var(--accent-soft)',title:'Доброе утро, Анна!',meta:'Инсайт NEXUS AI · 09:02',tag:'AI',tagColor:'var(--accent)',
+        body:'У вас 3 встречи сегодня. Клиент «Ромашка» прочитал ваше КП вчера в 20:00. Рекомендую позвонить в 10:00, чтобы обсудить условия — вероятность закрытия вырастет на 18%.',
+        actions:[{t:'Открыть сделку',p:true,act:'deal:1'},{t:'Отложить',p:false,act:'toast:Отложено на 1 час'}]},
+    {group:'Сегодня',type:'deal',ico:'fa-handshake',icoColor:'var(--green)',icoBg:'rgba(46,204,113,.14)',title:'Ромашка ООО',meta:'Сделка · Переговоры · 5 400 000 ₽',tag:'72%',tagColor:'var(--green)',
+        body:'Следующее действие: обсудить условия оплаты. Клиент проявил высокий интерес после демонстрации продукта.',
+        actions:[{t:'Позвонить',p:true,act:'call:Ромашка ООО'},{t:'Написать',p:false,act:'toast:Открыт чат со сделкой'}]},
+    {group:'Сегодня',type:'task',ico:'fa-list-check',icoColor:'var(--blue)',icoBg:'rgba(77,163,255,.14)',title:'Отправить КП компании «Ромашка»',meta:'Задача · срок до 16:00',tag:'Срочно',tagColor:'var(--red)',
+        body:'ИИ подготовил черновик коммерческого предложения на основе истории переписки. Остаётся проверить и отправить.',
+        actions:[{t:'Выполнить',p:true,act:'toast:Задача выполнена'},{t:'Делегировать',p:false,act:'toast:Задача делегирована'}]},
+    {group:'Сегодня',type:'notif',ico:'fa-envelope-open',icoColor:'var(--amber)',icoBg:'rgba(241,163,60,.14)',title:'Клиент прочитал ваше письмо',meta:'Уведомление · ГринЛайт · 08:47',tag:'Прочитано',tagColor:'var(--amber)',
+        body:'Олег Кузнецов открыл письмо с договором и провёл на нём 4 минуты. Хороший знак для закрытия сделки.',
+        actions:[{t:'Открыть сделку',p:true,act:'deal:3'}]},
+    {group:'Вчера',type:'ai',ico:'fa-triangle-exclamation',icoColor:'var(--red)',icoBg:'rgba(255,107,107,.14)',title:'Риск оттока: 2 клиента',meta:'Предиктивный скоринг',tag:'Внимание',tagColor:'var(--red)',
+        body:'У клиентов «Вектор Групп» и «Финмакс» снизилась активность. Рекомендую персональное касание в течение 48 часов.',
+        actions:[{t:'Показать план',p:true,act:'toast:AI сгенерировал план удержания'}]},
+    {group:'Вчера',type:'event',ico:'fa-video',icoColor:'var(--accent)',icoBg:'var(--accent-soft)',title:'Встреча: демо для «АкваСтрой»',meta:'Событие календаря · завершено',tag:'Запись',tagColor:'var(--accent)',
+        body:'Стенограмма готова. ИИ выделил ключевые договорённости и создал 2 задачи автоматически.',
+        actions:[{t:'Смотреть запись',p:false,act:'toast:Открыта запись встречи'}]},
+    {group:'Вчера',type:'msg',ico:'fa-comment-dots',icoColor:'var(--blue)',icoBg:'rgba(77,163,255,.14)',title:'Дмитрий Орлов',meta:'Чат · Запуск нового продукта',tag:'Чат',tagColor:'var(--blue)',
+        body:'«Коллеги, выложил новые макеты в рабочее пространство. Нужна проверка до пятницы.»',
+        actions:[{t:'Ответить',p:true,act:'toast:Ответ отправлен'},{t:'В задачу',p:false,act:'toast:Создана задача из сообщения'}]},
+];
+
+/* ============ RENDER ============ */
+function renderFeed(){
+    const f=document.getElementById('feed');let last='';
+    f.innerHTML=feedItems.map((it,i)=>{
+        let g=it.group!==last?`<div class="feed-group-label">${it.group}</div>`:'';last=it.group;
+        return g+`<div class="card ${it.type==='ai'?'ai-card':''}">
+            <div class="card-head">
+                <div class="card-ico" style="background:${it.icoBg};color:${it.icoColor}"><i class="fa-solid ${it.ico}"></i></div>
+                <div><div class="card-title">${it.title}</div><div class="card-meta">${it.meta}</div></div>
+                <div class="card-tag" style="background:${it.tagColor}22;color:${it.tagColor}">${it.tag}</div>
+            </div>
+            <div class="card-body">${it.body}</div>
+            <div class="card-actions">${it.actions.map(a=>`<button class="btn ${a.p?'btn-primary':'btn-ghost'}" onclick="doAction('${a.act}')">${a.t}</button>`).join('')}</div>
+        </div>`;
+    }).join('');
+}
+
+function renderKanban(){
+    const k=document.getElementById('kanban');
+    k.innerHTML=stages.map(s=>{
+        const list=deals.filter(d=>d.stage===s.id);
+        const sum=list.reduce((a,d)=>a+d.amount,0);
+        return `<div class="col" data-stage="${s.id}">
+            <div class="col-head">
+                <span style="width:9px;height:9px;border-radius:50%;background:${s.color}"></span>
+                <h4>${s.name}</h4><span class="col-count">${list.length}</span>
+                <span class="col-sum">${(sum/1000000).toFixed(1)}М</span>
+            </div>
+            ${list.map(d=>`<div class="deal" draggable="true" data-id="${d.id}" onclick="openDeal(${d.id})">
+                <div class="deal-company">${d.company}</div>
+                <div class="deal-amount">${money(d.amount)}</div>
+                <div class="deal-foot">
+                    <div class="deal-owner" style="background:${color(d.owner)}">${initials(d.owner)}</div>
+                    <span class="prob">Вероятность <b>${d.prob}%</b></span>
+                </div>
+            </div>`).join('')}
+        </div>`;
+    }).join('');
+    attachDnd();
+}
+
+function renderTasks(){
+    document.getElementById('taskList').innerHTML=tasks.map(t=>{
+        const b=taskBadges[t.status];
+        return `<div class="task ${t.done?'done':''}" data-id="${t.id}">
+            <div class="check" onclick="toggleTask(${t.id})"><i class="fa-solid fa-check" style="font-size:11px"></i></div>
+            <div><div class="task-name">${t.name}</div><div class="task-sub">${t.sub}</div></div>
+            <div class="task-badge" style="background:${b.c}22;color:${b.c}">${b.t}</div>
+        </div>`;
+    }).join('');
+}
+
+function renderTeam(){
+    document.getElementById('teamGrid').innerHTML=team.map(m=>`
+        <div class="member">
+            <div class="member-av" style="background:${color(m.name)}">${initials(m.name)}
+                <span class="status" style="background:${statusColor[m.status]}"></span></div>
+            <div class="member-name">${m.name}</div>
+            <div class="member-role">${m.role}</div>
+            <div class="member-stats">
+                <div><b>${m.deals}</b>Сделки</div>
+                <div><b>${m.calls}</b>Звонки</div>
+                <div><b>${m.tasks}</b>Задачи</div>
+            </div>
+        </div>`).join('');
+}
+
+/* Calendar */
+let calDate=new Date(2026,9,1);
+const months=['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+const dows=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+const calEvents={
+    5:[{t:'Демо · Вектор',c:'var(--accent)'}],
+    10:[{t:'Звонок · Ромашка',c:'var(--green)'},{t:'Встреча CEO',c:'var(--amber)'}],
+    14:[{t:'Демо · АкваСтрой',c:'var(--blue)'}],
+    18:[{t:'Подписание',c:'var(--accent)'}],
+    22:[{t:'Ретро NEXUS',c:'var(--amber)'}],
+    27:[{t:'Дедлайн КП',c:'var(--red)'}],
+};
+function renderCal(){
+    document.getElementById('calTitle').textContent=months[calDate.getMonth()]+' '+calDate.getFullYear();
+    const g=document.getElementById('calGrid');
+    g.innerHTML=dows.map(d=>`<div class="cal-dow">${d}</div>`).join('');
+    const y=calDate.getFullYear(),m=calDate.getMonth();
+    let first=new Date(y,m,1).getDay();first=first===0?6:first-1;
+    const days=new Date(y,m+1,0).getDate();
+    const prev=new Date(y,m,0).getDate();
+    let html='';
+    for(let i=first;i>0;i--)html+=`<div class="cal-day other"><div class="cal-num">${prev-i+1}</div></div>`;
+    for(let d=1;d<=days;d++){
+        const isToday=(d===10&&m===9&&y===2026);
+        const evs=calEvents[d]||[];
+        html+=`<div class="cal-day ${isToday?'today':''}">
+            <div class="cal-num">${d}</div>
+            ${evs.map(e=>`<div class="cal-ev" style="background:${e.c}22;color:${e.c}">${e.t}</div>`).join('')}
+        </div>`;
+    }
+    const total=first+days;const rest=(7-total%7)%7;
+    for(let i=1;i<=rest;i++)html+=`<div class="cal-day other"><div class="cal-num">${i}</div></div>`;
+    g.innerHTML+=html;
+}
+function shiftMonth(n){calDate.setMonth(calDate.getMonth()+n);renderCal()}
+
+/* Analytics */
+function renderAnalytics(){
+    const stats=[
+        {ico:'fa-sack-dollar',c:'var(--green)',v:'46.3М',l:'Сумма сделок',tr:'+12.4% за месяц',trc:'var(--green)'},
+        {ico:'fa-handshake',c:'var(--accent)',v:'8',l:'Активных сделок',tr:'+2 новых',trc:'var(--green)'},
+        {ico:'fa-bullseye',c:'var(--amber)',v:'85%',l:'Выполнение плана',tr:'До цели 15%',trc:'var(--amber)'},
+        {ico:'fa-percent',c:'var(--blue)',v:'28%',l:'Конверсия',tr:'+3.1% за месяц',trc:'var(--green)'},
+    ];
+    document.getElementById('statRow').innerHTML=stats.map(s=>`
+        <div class="stat">
+            <div class="stat-ico" style="background:${s.c}22;color:${s.c}"><i class="fa-solid ${s.ico}"></i></div>
+            <div class="stat-val">${s.v}</div>
+            <div class="stat-label">${s.l}</div>
+            <div class="stat-trend" style="color:${s.trc}">${s.tr}</div>
+        </div>`).join('');
+    const bd=[{m:'Май',v:60},{m:'Июн',v:75},{m:'Июл',v:55},{m:'Авг',v:85},{m:'Сен',v:70},{m:'Окт',v:92}];
+    document.getElementById('bars').innerHTML=bd.map(b=>`
+        <div class="bar-wrap"><div class="bar" style="height:0" data-h="${b.v}%"></div><div class="bar-label">${b.m}</div></div>`).join('');
+    setTimeout(()=>document.querySelectorAll('#bars .bar').forEach(b=>b.style.height=b.dataset.h),80);
+    const funnel=[{n:'Лиды',v:100,c:'#4da3ff',cnt:120},{n:'Квалификация',v:72,c:'#00cec9',cnt:86},{n:'Переговоры',v:48,c:'#f1a33c',cnt:58},{n:'Договор',v:30,c:'#9b8cff',cnt:36},{n:'Закрыто',v:22,c:'#2ecc71',cnt:26}];
+    document.getElementById('funnel').innerHTML=funnel.map(f=>`
+        <div class="funnel-stage">
+            <div class="funnel-info"><span>${f.n}</span><span>${f.cnt}</span></div>
+            <div class="funnel-bar" style="width:${f.v}%;background:${f.c}">${f.v}%</div>
+        </div>`).join('');
+}
+
+/* ============ DEAL MODAL ============ */
+let modalTab='overview';
+function openDeal(id){
+    const d=deals.find(x=>x.id===id);if(!d)return;
+    const stage=stages.find(s=>s.id===d.stage);
+    modalTab='overview';
+    document.getElementById('modal').innerHTML=`
+        <i class="fa-solid fa-xmark modal-close" onclick="closeModal()"></i>
+        <div class="modal-head">
+            <div class="modal-logo" style="background:${color(d.company)}">${initials(d.company)}</div>
+            <div>
+                <div class="modal-title">${d.company}</div>
+                <div class="modal-sub">${d.industry} · ${d.city} · <span style="color:${stage.color}">${stage.name}</span></div>
+            </div>
+            <div class="modal-amount"><b>${money(d.amount)}</b><div class="modal-sub">Вероятность ${d.prob}%</div></div>
+        </div>
+        <div class="tabs">
+            ${[['overview','Обзор'],['comm','Коммуникации'],['tasks','Задачи'],['files','Файлы'],['history','История'],['ai','AI-подсказка']]
+                .map(t=>`<div class="tab ${t[0]==='overview'?'active':''}" onclick="switchTab('${t[0]}')">${t[1]}</div>`).join('')}
+        </div>
+        <div class="modal-body">
+            <div class="tabpane active" id="pane-overview">
+                <div class="info-grid">
+                    <div class="info-item"><span>Контактное лицо</span><b>${d.contact}</b></div>
+                    <div class="info-item"><span>Телефон</span><b>${d.phone}</b></div>
+                    <div class="info-item"><span>Ответственный</span><b>${d.owner}</b></div>
+                    <div class="info-item"><span>Отрасль</span><b>${d.industry}</b></div>
+                </div>
+                <h3 style="font-size:15px;margin-bottom:14px">Следующие шаги</h3>
+                <div class="timeline-item"><div class="tl-ico" style="background:var(--accent-soft);color:var(--accent)"><i class="fa-solid fa-phone"></i></div>
+                    <div class="tl-body"><b>Позвонить клиенту</b><p>Обсудить условия оплаты и сроки внедрения</p><div class="tl-time">Рекомендовано сегодня в 10:00</div></div></div>
+                <div class="timeline-item"><div class="tl-ico" style="background:rgba(77,163,255,.14);color:var(--blue)"><i class="fa-solid fa-file-lines"></i></div>
+                    <div class="tl-body"><b>Отправить обновлённое КП</b><p>ИИ подготовил черновик с учётом переговоров</p><div class="tl-time">До 16:00</div></div></div>
+                <div style="display:flex;gap:10px;margin-top:8px">
+                    <button class="btn btn-primary" onclick="doAction('call:${d.company}')"><i class="fa-solid fa-phone"></i> Позвонить</button>
+                    <button class="btn btn-ghost" onclick="showToast('Открыт чат')"><i class="fa-solid fa-comment"></i> Написать</button>
+                    <button class="btn btn-ghost" onclick="showToast('Встреча запланирована')"><i class="fa-solid fa-calendar-plus"></i> Встреча</button>
+                </div>
+            </div>
+            <div class="tabpane" id="pane-comm">
+                ${commLog(d)}
+            </div>
+            <div class="tabpane" id="pane-tasks">
+                <div class="task-list">
+                    <div class="task"><div class="check" style="border-color:var(--green);background:var(--green);color:#fff"><i class="fa-solid fa-check" style="font-size:11px"></i></div><div><div class="task-name" style="text-decoration:line-through;color:var(--text-faint)">Провести первичный звонок</div><div class="task-sub">Выполнено</div></div></div>
+                    <div class="task"><div class="check"></div><div><div class="task-name">Подготовить КП</div><div class="task-sub">В работе · до 16:00</div></div><div class="task-badge" style="background:var(--blue)22;color:var(--blue)">В работе</div></div>
+                    <div class="task"><div class="check"></div><div><div class="task-name">Согласовать договор</div><div class="task-sub">На согласовании у юриста</div></div><div class="task-badge" style="background:var(--amber)22;color:var(--amber)">Согласование</div></div>
+                </div>
+            </div>
+            <div class="tabpane" id="pane-files">
+                <div class="file-row" onclick="showToast('Открыт файл')"><div class="file-ico" style="color:var(--red)"><i class="fa-solid fa-file-pdf"></i></div><div><b>Коммерческое_предложение.pdf</b><div class="task-sub">2.4 МБ · загружено вчера</div></div></div>
+                <div class="file-row" onclick="showToast('Открыт файл')"><div class="file-ico" style="color:var(--blue)"><i class="fa-solid fa-file-word"></i></div><div><b>Договор_поставки.docx</b><div class="task-sub">890 КБ · на согласовании</div></div></div>
+                <div class="file-row" onclick="showToast('Открыт файл')"><div class="file-ico" style="color:var(--green)"><i class="fa-solid fa-file-excel"></i></div><div><b>Расчёт_стоимости.xlsx</b><div class="task-sub">340 КБ · 3 дня назад</div></div></div>
+            </div>
+            <div class="tabpane" id="pane-history">
+                <div class="timeline-item"><div class="tl-ico" style="background:rgba(46,204,113,.14);color:var(--green)"><i class="fa-solid fa-arrow-right"></i></div><div class="tl-body"><b>Стадия изменена на «${stage.name}»</b><p>${d.owner}</p><div class="tl-time">Сегодня, 09:15</div></div></div>
+                <div class="timeline-item"><div class="tl-ico" style="background:var(--accent-soft);color:var(--accent)"><i class="fa-solid fa-video"></i></div><div class="tl-body"><b>Видеовстреча · 42 мин</b><p>Демонстрация продукта. Стено��рамма готова.</p><div class="tl-time">Вчера, 14:00</div></div></div>
+                <div class="timeline-item"><div class="tl-ico" style="background:rgba(77,163,255,.14);color:var(--blue)"><i class="fa-solid fa-envelope"></i></div><div class="tl-body"><b>Письмо отправлено</b><p>Коммерческое предложение</p><div class="tl-time">3 дня назад</div></div></div>
+                <div class="timeline-item"><div class="tl-ico" style="background:rgba(241,163,60,.14);color:var(--amber)"><i class="fa-solid fa-plus"></i></div><div class="tl-body"><b>Сделка создана</b><p>Источник: входящая заявка с сайта</p><div class="tl-time">2 недели назад</div></div></div>
+            </div>
+            <div class="tabpane" id="pane-ai">
+                <div class="ai-box">
+                    <div class="ai-head"><i class="fa-solid fa-wand-magic-sparkles"></i> Рекомендации NEXUS AI</div>
+                    <div class="ai-rec"><i class="fa-solid fa-lightbulb"></i> Предложите скидку 5% — это повысит вероятность закрытия до ${Math.min(d.prob+15,99)}%.</div>
+                    <div class="ai-rec"><i class="fa-solid fa-clock"></i> Оптимальное время для звонка: сегодня 10:00 (клиент активен утром).</div>
+                    <div class="ai-rec"><i class="fa-solid fa-shield-halved"></i> Клиент упоминал конкурента. Акцентируйте скорость внедрения — наше преимущество.</div>
+                    <div class="ai-rec"><i class="fa-solid fa-file-lines"></i> Готов черновик письма с учётом истории переговоров. Отправить?</div>
+                </div>
+                <button class="btn btn-primary" style="margin-top:16px" onclick="showToast('AI сгенерировал письмо')"><i class="fa-solid fa-paper-plane"></i> Сгенерировать письмо</button>
+            </div>
+        </div>`;
+    document.getElementById('overlay').classList.add('open');
+}
+function commLog(d){
+    const rows=[
+        {ico:'fa-phone',c:'var(--green)',t:'Аудиозвонок · 12 мин',p:'Расшифровка: клиент заинтересован, уточнял сроки поставки.',tm:'Сегодня, 09:40'},
+        {ico:'fa-video',c:'var(--accent)',t:'Видеовстреча · 42 мин',p:'Демо продукта. AI выделил 3 ключевые договорённости.',tm:'Вчера, 14:00'},
+        {ico:'fa-envelope',c:'var(--blue)',t:'Email · Отправлено',p:'КП открыто клиентом, время чтения 4 мин.',tm:'3 дня назад'},
+        {ico:'fa-comment-dots',c:'var(--amber)',t:'Чат',p:'«Спасибо за предложение, обсудим на встрече»',tm:'4 дня назад'},
+    ];
+    return rows.map(r=>`<div class="timeline-item"><div class="tl-ico" style="background:${r.c}22;color:${r.c}"><i class="fa-solid ${r.ico}"></i></div><div class="tl-body"><b>${r.t}</b><p>${r.p}</p><div class="tl-time">${r.tm}</div></div></div>`).join('');
+}
+function switchTab(t){
+    document.querySelectorAll('.tab').forEach((el,i)=>{});
+    document.querySelectorAll('.modal .tab').forEach(el=>el.classList.toggle('active',el.getAttribute('onclick').includes("'"+t+"'")));
+    document.querySelectorAll('.tabpane').forEach(p=>p.classList.toggle('active',p.id==='pane-'+t));
+}
+function closeModal(){document.getElementById('overlay').classList.remove('open')}
+document.getElementById('overlay').addEventListener('click',e=>{if(e.target.id==='overlay')closeModal()});
+
+/* ============ ACTIONS ============ */
+function doAction(act){
+    const [type,val]=act.split(':');
+    if(type==='deal')openDeal(parseInt(val));
+    else if(type==='call'){showToast('Набираем '+val+'... запись включена');}
+    else if(type==='toast')showToast(val);
+}
+function toggleTask(id){
+    const t=tasks.find(x=>x.id===id);t.done=!t.done;t.status=t.done?'done':'work';
+    renderTasks();if(t.done)showToast('Задача выполнена — держите виртуальную медаль!');
+}
+let toastTimer;
+function showToast(msg){
+    const el=document.getElementById('toast');document.getElementById('toastText').textContent=msg;
+    el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2800);
+}
+
+/* Drag & Drop */
+function attachDnd(){
+    let dragged=null;
+    document.querySelectorAll('.deal').forEach(el=>{
+        el.addEventListener('dragstart',e=>{dragged=el;el.classList.add('dragging');e.stopPropagation()});
+        el.addEventListener('dragend',()=>{if(dragged)dragged.classList.remove('dragging');dragged=null});
+    });
+    document.querySelectorAll('.col').forEach(col=>{
+        col.addEventListener('dragover',e=>e.preventDefault());
+        col.addEventListener('drop',e=>{
+            e.preventDefault();if(!dragged)return;
+            const id=parseInt(dragged.dataset.id);const st=col.dataset.stage;
+            const d=deals.find(x=>x.id===id);d.stage=st;
+            const s=stages.find(x=>x.id===st);
+            renderKanban();showToast(`«${d.company}» → ${s.name}`);
+        });
+    });
+}
+
+/* Navigation */
+const pageInfo={
+    feed:['Умная лента','Всё важное — в одном потоке'],
+    deals:['Сделки','Перетаскивайте карточки между стадиями'],
+    tasks:['Задачи','Мои задачи и задачи команды'],
+    team:['Команда','Статусы и загрузка сотрудников'],
+    calendar:['Календарь','Встречи и дедлайны'],
+    analytics:['Аналитика','Дашборды с AI-инсайтами'],
+};
+document.querySelectorAll('.nav-item[data-view]').forEach(n=>{
+    n.addEventListener('click',()=>{
+        const v=n.dataset.view;
+        document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
+        n.classList.add('active');
+        document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+        document.getElementById('view-'+v).classList.add('active');
+        document.getElementById('pageTitle').textContent=pageInfo[v][0];
+        document.getElementById('pageSub').textContent=pageInfo[v][1];
+    });
+});
+
+/* Search */
+document.getElementById('globalSearch').addEventListener('keydown',e=>{
+    if(e.key==='Enter'&&e.target.value.trim()){
+        showToast('NEXUS AI ищет: "'+e.target.value.trim()+'"');
+        e.target.value='';
+    }
+});
+
+/* Init */
+renderFeed();renderKanban();renderTasks();renderTeam();renderCal();renderAnalytics();
+</script>
+</body>
+</html>
