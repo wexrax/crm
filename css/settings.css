@@ -1,5 +1,5 @@
 /* Settings */
-.settings-list { max-width: 720px; }
+.settings-list { width: 100%; }
 .settings-card {
   display: flex; align-items: center; gap: 14px;
   background: linear-gradient(160deg, rgba(255,255,255,0.055), rgba(255,255,255,0.02));
@@ -26,3 +26,19 @@
 [data-theme="light"] .settings-card-desc { color: var(--text-secondary); }
 .settings-card-arrow { color: #646b7a; font-size: 14px; }
 [data-theme="light"] .settings-card-arrow { color: var(--text-faint); }
+
+@media (max-width: 560px) {
+  .settings-card {
+    align-items: flex-start;
+    padding: 15px;
+    border-radius: 15px;
+  }
+  .settings-card-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 11px;
+  }
+  .settings-card-arrow {
+    display: none;
+  }
+}

@@ -16,7 +16,7 @@ function renderKanban() {
           <span class="kanban-column-sum">${Utils.moneyShort(sum)}</span>
         </div>
         ${deals.map(d => `
-          <div class="deal-card" draggable="true" data-id="${d.id}" onclick="openDealModal(${d.id})">
+          <div class="deal-card" draggable="true" data-id="${d.id}" onclick="openDealByType(${d.id})">
             <div class="deal-card-title">${d.company}</div>
             <div class="deal-card-amount">${Utils.money(d.amount)}</div>
             <div class="deal-card-progress"><div class="deal-card-progress-fill" style="width:${d.prob}%"></div></div>

@@ -39,3 +39,23 @@
 }
 
 @media (max-width: 900px) { .dashboard { grid-template-columns: 1fr; } }
+
+@media (max-width: 620px) {
+  .panel {
+    padding: 16px;
+    border-radius: 16px;
+  }
+  .bar-chart {
+    gap: 7px;
+    height: 150px;
+    padding: 14px 0 22px;
+  }
+  .bar-item span {
+    font-size: 10px;
+    top: -20px;
+  }
+  .bar-item b {
+    font-size: 10px;
+    bottom: -22px;
+  }
+}

@@ -1,5 +1,5 @@
 /* Communications */
-.comms-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; max-width: 820px; }
+.comms-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; width: 100%; }
 .comm-card {
   background: linear-gradient(160deg, rgba(255,255,255,0.055), rgba(255,255,255,0.02));
   border: 1px solid rgba(255,255,255,0.07);
@@ -18,3 +18,23 @@
 [data-theme="light"] .comm-card-title { color: var(--text); }
 .comm-card-desc { font-size: 11px; color: #8b93b0; }
 [data-theme="light"] .comm-card-desc { color: var(--text-secondary); }
+
+@media (max-width: 560px) {
+  .comms-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .comm-card {
+    display: grid;
+    grid-template-columns: 34px 1fr;
+    column-gap: 12px;
+    text-align: left;
+    padding: 16px;
+    border-radius: 15px;
+  }
+  .comm-card-icon {
+    margin: 0;
+    font-size: 23px;
+    grid-row: 1 / span 2;
+  }
+}

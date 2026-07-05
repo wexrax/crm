@@ -21,6 +21,7 @@ function renderHrTabs() {
 }
 
 function setHrTab(id) {
+  if (id === hrTabId) return;
   hrTabId = id;
   renderHR();
 }
@@ -46,9 +47,9 @@ function renderHrDashboard(hr) {
     { l: 'Текучесть, год', v: '9.4%', t: '−2.1пп', up: true, ic: 'fa-user-slash', c: '#f87171' },
   ];
   return '<div class="kpi-row">' + kpis.map(k =>
-    '<div class="kpi-card"><div class="kpi-label"><i class="fa-solid ' + k.ic + '" style="color:' + k.c + '"></i> ' + k.l + '</div><div class="kpi-value">' + k.v + '</div><div class="kpi-trend" style="color:' + (k.up ? 'var(--green)' : 'var(--amber)') + '"><i class="fa-solid fa-arrow-' + (k.up ? 'up' : 'clock') + '"></i> ' + k.t + '</div></div>'
+    '<div class="kpi-card"><div class="kpi-label"><i class="fa-solid ' + k.ic + '" style="color:' + k.c + '"></i> ' + k.l + '</div><div class="kpi-value">' + k.v + '</div><div class="kpi-trend" style="color:' + (k.up ? 'var(--green)' : 'var(--amber)') + '"><i class="fa-solid ' + (k.up ? 'fa-arrow-up' : 'fa-clock') + '"></i> ' + k.t + '</div></div>'
   ).join('') + '</div>' +
-  '<div style="display:grid;grid-template-columns:1.4fr 1fr;gap:18px;margin-bottom:18px">' +
+  '<div class="hr-dashboard-grid">' +
   '<div class="mkt-panel"><div class="mkt-panel-title"><i class="fa-solid fa-filter" style="color:#a855f7"></i> Воронка найма · конверсия этапов</div>' +
   '<div class="funnel-list">' +
   [
@@ -61,21 +62,19 @@ function renderHrDashboard(hr) {
   ].map(f => '<div class="funnel-row"><span class="funnel-label">' + f.n + '</span><div class="funnel-bar-wrap"><div class="funnel-bar" style="width:' + f.v + '%;background:linear-gradient(90deg,' + f.c + ',' + f.c + 'cc)">' + f.cnt + '</div></div><span class="funnel-conv">' + f.conv + '</span></div>').join('') +
   '</div></div>' +
   '<div class="mkt-panel"><div class="mkt-panel-title"><i class="fa-solid fa-chart-pie" style="color:#f472b6"></i> Источники кандидатов</div>' +
-  '<div style="display:flex;gap:28px;align-items:center">' +
-  '<svg width="160" height="160" viewBox="0 0 42 42" style="flex-shrink:0">' +
+  '<div class="hr-source-chart">' +
+  '<div class="source-donut"><svg viewBox="0 0 42 42">' +
   '<circle cx="21" cy="21" r="15.9" fill="none" class="donut-bg" stroke-width="6"/>' +
   '<circle cx="21" cy="21" r="15.9" fill="none" stroke="#6366f1" stroke-width="6" stroke-dasharray="44 56" stroke-dashoffset="25" transform="rotate(-90 21 21)"/>' +
   '<circle cx="21" cy="21" r="15.9" fill="none" stroke="#ec4899" stroke-width="6" stroke-dasharray="24 76" stroke-dashoffset="-19" transform="rotate(-90 21 21)"/>' +
   '<circle cx="21" cy="21" r="15.9" fill="none" stroke="#f59e0b" stroke-width="6" stroke-dasharray="18 82" stroke-dashoffset="-43" transform="rotate(-90 21 21)"/>' +
   '<circle cx="21" cy="21" r="15.9" fill="none" stroke="#34d399" stroke-width="6" stroke-dasharray="14 86" stroke-dashoffset="-61" transform="rotate(-90 21 21)"/>' +
-  '<text x="21" y="20" text-anchor="middle" dominant-baseline="central" class="donut-center" style="font-size:10px;font-weight:800">1.2К</text>' +
-  '<text x="21" y="26" text-anchor="middle" class="donut-label" style="font-size:5.5px">откликов</text>' +
-  '</svg>' +
-  '<div style="display:flex;flex-direction:column;gap:12px;flex:1">' +
-  '<div style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-secondary)"><span style="width:12px;height:12px;border-radius:3px;background:#6366f1;flex-shrink:0"></span> hh.ru <b style="margin-left:auto;color:var(--text)">44%</b></div>' +
-  '<div style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-secondary)"><span style="width:12px;height:12px;border-radius:3px;background:#ec4899;flex-shrink:0"></span> Referral <b style="margin-left:auto;color:var(--text)">24%</b></div>' +
-  '<div style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-secondary)"><span style="width:12px;height:12px;border-radius:3px;background:#f59e0b;flex-shrink:0"></span> Карьерный сайт <b style="margin-left:auto;color:var(--text)">18%</b></div>' +
-  '<div style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-secondary)"><span style="width:12px;height:12px;border-radius:3px;background:#34d399;flex-shrink:0"></span> LinkedIn <b style="margin-left:auto;color:var(--text)">14%</b></div>' +
+  '</svg><div class="source-donut-center"><strong>1,2К</strong><span>откликов</span></div></div>' +
+  '<div class="source-legend">' +
+  '<div class="source-legend-row"><span class="source-legend-color" style="background:#6366f1"></span> hh.ru <b>44%</b></div>' +
+  '<div class="source-legend-row"><span class="source-legend-color" style="background:#ec4899"></span> Referral <b>24%</b></div>' +
+  '<div class="source-legend-row"><span class="source-legend-color" style="background:#f59e0b"></span> Карьерный сайт <b>18%</b></div>' +
+  '<div class="source-legend-row"><span class="source-legend-color" style="background:#34d399"></span> LinkedIn <b>14%</b></div>' +
   '</div></div></div></div>' +
   '<div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:14px"><i class="fa-solid fa-bolt" style="color:var(--amber)"></i> Срочные действия на сегодня</div>' +
   '<div class="grid-3">' +

@@ -27,6 +27,8 @@
 <body>
 
 <div class="app">
+  <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeMobileMenu()"></div>
+
   <!-- Sidebar -->
   <aside class="sidebar">
     <div class="sidebar-logo" onclick="navigateTo('feed')"><i class="fa-solid fa-bolt"></i></div>
@@ -43,11 +45,11 @@
     <div class="nav-item" data-view="chats"><i class="fa-solid fa-message"></i><span class="tooltip">Чаты</span></div>
     <div class="nav-item" data-view="comms"><i class="fa-solid fa-comments"></i><span class="tooltip">Коммуникации</span></div>
     <div class="nav-item" data-view="calendar"><i class="fa-solid fa-calendar-days"></i><span class="tooltip">Календарь</span></div>
-    <div class="nav-item" data-view="analytics"><i class="fa-solid fa-chart-column"></i><span class="tooltip">Аналитика</span></div>
     <div class="nav-spacer"></div>
     <div class="theme-toggle" onclick="toggleTheme()" title="Сменить тему">
       <i class="fa-solid fa-moon icon-sun"></i>
       <i class="fa-solid fa-sun icon-moon"></i>
+      <span class="theme-toggle-label">Тема</span>
     </div>
     <div class="nav-item" data-view="settings"><i class="fa-solid fa-gear"></i><span class="tooltip">Настройки</span></div>
   </aside>
@@ -55,11 +57,14 @@
   <!-- Main -->
   <main class="main">
     <div class="topbar">
+      <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="toggleMobileMenu()" aria-label="Открыть меню" aria-expanded="false">
+        <i class="fa-solid fa-bars"></i>
+      </button>
       <div class="topbar-brand">NE<span>XUS</span></div>
-      <div class="search-box">
+      <div class="search-box" id="globalSearchBox">
         <i class="fa-solid fa-magnifying-glass"></i>
-        <input type="text" placeholder="Найдите клиента, задачу или сделку…">
-        <span class="search-shortcut">⌘K</span>
+        <input id="globalSearchInput" type="search" placeholder="поиск..." autocomplete="off">
+        <div class="search-results" id="globalSearchResults"></div>
       </div>
       <div class="topbar-spacer"></div>
       <div class="icon-btn" onclick="showToast('Видеозвонок запускается…', 'fa-video')"><i class="fa-solid fa-video"></i></div>
@@ -72,22 +77,38 @@
       <!-- HOME / FEED -->
       <div class="view active" id="view-feed">
         <div class="view-title" id="pageTitle">Доброе утро, Анна <i class="fa-solid fa-hand-sparkles" style="color:#fbbf24;font-size:20px"></i></div>
-        <div class="view-subtitle" id="pageSubtitle">Сегодня у вас 3 встречи, 7 задач и уведомления. Всё важное — в одном потоке.</div>
+        <div class="view-subtitle" id="pageSubtitle">3 встречи · 7 задач · новые уведомления</div>
         <div class="stat-row" id="homeStats"></div>
+        <div id="homeAnalytics"></div>
         <div id="feed" class="feed"></div>
+      </div>
+
+      <!-- COMPANY CARD -->
+      <div class="view" id="view-company-card">
+        <div id="companyCardContent"></div>
+      </div>
+
+      <!-- DEAL CARD -->
+      <div class="view" id="view-deal-card">
+        <div id="dealCardContent"></div>
+      </div>
+
+      <!-- CONTACT CARD -->
+      <div class="view" id="view-contact-card">
+        <div id="contactCardContent"></div>
       </div>
 
       <!-- DEALS -->
       <div class="view" id="view-deals">
         <div class="view-title">Воронка продаж</div>
-        <div class="view-subtitle">8 активных сделок · Прогноз закрытия ₽ 18,4М в этом месяце</div>
+        <div class="view-subtitle">8 активных сделок · прогноз ₽ 18,4М</div>
         <div id="kanban" class="kanban"></div>
       </div>
 
       <!-- COMPANIES -->
       <div class="view" id="view-companies">
         <div class="view-title">Компании</div>
-        <div class="view-subtitle">248 карточек · Список всех заведённых компаний с делами и ответственными</div>
+        <div class="view-subtitle">248 компаний</div>
         <div class="tbl-toolbar">
           <button class="btn btn-primary btn-sm" onclick="showToast('Форма создания компании', 'fa-plus')"><i class="fa-solid fa-plus"></i> Создать</button>
           <div class="tbl-search"><i class="fa-solid fa-magnifying-glass"></i><input placeholder="Поиск по названию или ИНН" oninput="filterCompanies(this.value)"/></div>
@@ -98,7 +119,7 @@
       <!-- CONTACTS -->
       <div class="view" id="view-contacts">
         <div class="view-title">Контакты · Физические лица</div>
-        <div class="view-subtitle">312 контактов · Работа с частными клиентами</div>
+        <div class="view-subtitle">312 контактов</div>
         <div class="tbl-toolbar">
           <button class="btn btn-primary btn-sm" onclick="showToast('Форма создания контакта', 'fa-plus')"><i class="fa-solid fa-plus"></i> Создать</button>
           <div class="tbl-search"><i class="fa-solid fa-magnifying-glass"></i><input placeholder="Поиск по имени или телефону" oninput="filterContacts(this.value)"/></div>
@@ -109,14 +130,14 @@
       <!-- TASKS -->
       <div class="view" id="view-tasks">
         <div class="view-title">Задачи</div>
-        <div class="view-subtitle">7 активных · 2 срочные · Умный таск-менеджер с ИИ-приоритизацией</div>
+        <div class="view-subtitle">7 активных · 2 срочные</div>
         <div id="taskList" class="task-list"></div>
       </div>
 
       <!-- PROCESSES -->
       <div class="view" id="view-proc">
         <div class="view-title">Процессы · Согласования <span class="badge2" style="background:rgba(139,92,246,.2);color:#c4b5fd;margin-left:10px"><i class="fa-solid fa-diagram-project"></i> Low-code BPM</span></div>
-        <div class="view-subtitle">Согласование договоров, счетов и задач по маршрутам</div>
+        <div class="view-subtitle">4 процесса · 3 требуют решения</div>
         <div class="tbl-toolbar">
           <button class="btn btn-primary btn-sm" onclick="showToast('Запуск процесса по шаблону…', 'fa-play')"><i class="fa-solid fa-plus"></i> Запустить процесс</button>
           <button class="btn btn-sm" onclick="showToast('Конструктор процессов', 'fa-cubes')"><i class="fa-solid fa-cubes"></i> Конструктор</button>
@@ -128,7 +149,7 @@
       <!-- MARKETING -->
       <div class="view" id="view-mkt">
         <div class="view-title">Маркетинг · Командный центр <span class="badge2" style="background:rgba(236,72,153,.2);color:#f9a8d4;margin-left:10px"><i class="fa-solid fa-bullhorn"></i> Omnichannel</span></div>
-        <div class="view-subtitle">Единая платформа кампаний: сегментация, каналы и аналитика ROI</div>
+        <div class="view-subtitle">Кампании · сегменты · ROI</div>
         <div class="mkt-tabs" id="mktTabs"></div>
         <div id="mktContent"></div>
       </div>
@@ -136,20 +157,27 @@
       <!-- BOARDS / AGILE -->
       <div class="view" id="view-boards">
         <div class="view-title">Проекты · Agile-доски <span class="badge2" style="background:rgba(139,92,246,.2);color:#c4b5fd;margin-left:10px"><i class="fa-solid fa-table-columns"></i> Kaiten-style</span></div>
-        <div class="view-subtitle">Канбан и Скрам: дорожки, WIP-лимиты, спринты, бэклог</div>
+        <div class="view-subtitle">Канбан и Скрам из коробки: дорожки, WIP-лимиты, спринты, бэклог — вся работа компании на одном экране</div>
         <div class="tbl-toolbar">
-          <button class="btn btn-primary btn-sm" onclick="showToast('Создание карточки задачи…', 'fa-plus')"><i class="fa-solid fa-plus"></i> Добавить</button>
-          <button class="btn btn-sm active-tab" id="bdKanbanTab" onclick="switchBdView('kanban')"><i class="fa-solid fa-table-columns"></i> Доски</button>
-          <button class="btn btn-sm" id="bdGanttTab" onclick="switchBdView('gantt')"><i class="fa-solid fa-chart-gantt"></i> Гантт</button>
+          <button class="btn btn-primary btn-sm" onclick="showToast('Создание карточки…', 'fa-plus')"><i class="fa-solid fa-plus"></i> Добавить</button>
+          <button class="btn btn-sm bd-tab active" data-mode="kanban" onclick="switchBdView('kanban')"><i class="fa-solid fa-table-columns"></i> Доски</button>
+          <button class="btn btn-sm bd-tab" data-mode="table" onclick="switchBdView('table')"><i class="fa-solid fa-table-list"></i> Таблица</button>
+          <button class="btn btn-sm bd-tab" data-mode="gantt" onclick="switchBdView('gantt')"><i class="fa-solid fa-chart-gantt"></i> Гантт</button>
+          <button class="btn btn-sm bd-tab" data-mode="cal" onclick="switchBdView('cal')"><i class="fa-regular fa-calendar-days"></i> Календарь</button>
+          <div style="flex:1"></div>
+          <button class="btn btn-sm" onclick="showToast('Отчёты: скорость, Lead time, CFD', 'fa-chart-line')"><i class="fa-solid fa-chart-line"></i> Отчёты</button>
+          <button class="btn btn-sm" onclick="showToast('Фильтры по исполнителю, метке, сроку', 'fa-filter')"><i class="fa-solid fa-filter"></i> Фильтры</button>
         </div>
         <div id="bdKanban"></div>
+        <div id="bdTable" style="display:none"></div>
         <div id="bdGantt" style="display:none"></div>
+        <div id="bdCal" style="display:none"></div>
       </div>
 
       <!-- HR -->
       <div class="view" id="view-hr">
         <div class="view-title">HR · Управление персоналом <span class="badge2" style="background:rgba(236,72,153,.2);color:#f9a8d4;margin-left:10px"><i class="fa-solid fa-user-plus"></i> Полный жизненный цикл</span></div>
-        <div class="view-subtitle">От первого касания с кандидатом до развития сотрудника</div>
+        <div class="view-subtitle">14 вакансий · 187 кандидатов</div>
         <div class="mkt-tabs" id="hrTabs"></div>
         <div id="hrContent"></div>
       </div>
@@ -157,8 +185,8 @@
       <!-- TEAM -->
       <div class="view" id="view-team">
         <div class="view-title">Команда</div>
-        <div class="view-subtitle">6 сотрудников · Статусы обновляются в реальном времени</div>
-        <div id="teamGrid" class="grid-2" style="max-width:820px"></div>
+        <div class="view-subtitle">6 сотрудников</div>
+        <div id="teamGrid" class="grid-2"></div>
       </div>
 
       <!-- CHATS -->
@@ -169,7 +197,7 @@
       <!-- COMMS -->
       <div class="view" id="view-comms">
         <div class="view-title">Omnichannel Hub</div>
-        <div class="view-subtitle">Все каналы в одном месте — видео, чат, мессенджеры, почта, телефония</div>
+        <div class="view-subtitle">Видео · чат · почта · телефония</div>
         <div id="commsGrid" class="comms-grid"></div>
       </div>
 
@@ -185,29 +213,10 @@
         <div id="calendarGrid" class="calendar-grid"></div>
       </div>
 
-      <!-- ANALYTICS -->
-      <div class="view" id="view-analytics">
-        <div class="view-title">Аналитика · Прогноз выручки</div>
-        <div class="view-subtitle">Прогноз на основе исторических данных и текущей воронки</div>
-        <div id="statRow" class="stat-row"></div>
-        <div class="dashboard">
-          <div class="panel">
-            <div class="panel-title">Выручка по месяцам</div>
-            <div class="panel-sub">Прогноз с доверительным интервалом · 2026</div>
-            <div id="barChart" class="bar-chart"></div>
-          </div>
-          <div class="panel">
-            <div class="panel-title">Воронка продаж</div>
-            <div class="panel-sub">Текущий квартал</div>
-            <div id="funnel"></div>
-          </div>
-        </div>
-      </div>
-
       <!-- SETTINGS -->
       <div class="view" id="view-settings">
         <div class="view-title">Настройки · Безопасность</div>
-        <div class="view-subtitle">RBAC, 2FA, шифрование AES-256, аудит — всё под контролем</div>
+        <div class="view-subtitle">Безопасность · роли · интеграции</div>
         <div id="settingsList" class="settings-list"></div>
       </div>
 
@@ -241,18 +250,20 @@
   </div>
 </div>
 
-<!-- Process Modal -->
+<!-- Process Modal (Full-screen) -->
 <div class="overlay" id="processModal">
-  <div class="modal" style="max-width:820px">
-    <div class="modal-header">
-      <div class="modal-header-avatar" id="procModalIcon" style="background:linear-gradient(135deg,#6366f1,#a855f7)"><i class="fa-solid fa-file-contract"></i></div>
-      <div class="modal-header-info">
-        <div class="modal-header-title" id="procModalName">Согласование договора</div>
-        <div class="modal-header-meta" id="procModalMeta"></div>
+  <div class="pm">
+    <div class="pm-header">
+      <div class="pm-header-left">
+        <div class="pm-icon" id="procModalIcon" style="background:linear-gradient(135deg,#6366f1,#a855f7)"><i class="fa-solid fa-file-contract"></i></div>
+        <div>
+          <div class="pm-title" id="procModalName">Согласование договора</div>
+          <div class="pm-meta" id="procModalMeta"></div>
+        </div>
       </div>
-      <button class="modal-close" onclick="closeProcessModal()"><i class="fa-solid fa-xmark"></i></button>
+      <button class="pm-close" onclick="closeProcessModal()"><i class="fa-solid fa-xmark"></i></button>
     </div>
-    <div class="modal-body" id="procModalBody"></div>
+    <div class="pm-body" id="procModalBody"></div>
   </div>
 </div>
 

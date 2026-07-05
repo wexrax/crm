@@ -32,3 +32,16 @@
 [data-theme="light"] .team-member-role { color: var(--text-secondary); }
 .team-member-status-label { display: flex; align-items: center; gap: 6px; font-size: 11px; }
 .team-member-status-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+@media (max-width: 560px) {
+  .team-member {
+    align-items: flex-start;
+    padding: 14px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .team-member-status-label {
+    width: 100%;
+    padding-left: 54px;
+  }
+}

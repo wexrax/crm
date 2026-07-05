@@ -28,3 +28,48 @@
   font-weight: 600;
   box-shadow: 0 1px 3px rgba(0,0,0,0.06);
 }
+
+@media (max-width: 720px) {
+  .calendar-grid {
+    gap: 5px;
+  }
+  .calendar-day {
+    min-height: 74px;
+    padding: 7px 5px;
+    border-radius: 9px;
+  }
+  .calendar-dow {
+    font-size: 10.5px;
+  }
+  .calendar-event {
+    padding: 3px 4px;
+    font-size: 9.5px;
+  }
+}
+
+@media (max-width: 480px) {
+  .calendar-header {
+    margin-bottom: 14px;
+  }
+  .calendar-title {
+    font-size: 18px;
+  }
+  .calendar-grid {
+    gap: 4px;
+  }
+  .calendar-day {
+    min-height: 58px;
+    padding: 6px 4px;
+  }
+  .calendar-day-number {
+    font-size: 11px;
+    margin-bottom: 4px;
+  }
+  .calendar-event {
+    width: 7px;
+    height: 7px;
+    padding: 0;
+    border-radius: 50%;
+    color: transparent;
+  }
+}
